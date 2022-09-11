@@ -1,0 +1,77 @@
+{
+  "project_info": {
+    "project_number": "97413835492",
+    "firebase_url": "https://sound-temple-215321-default-rtdb.firebaseio.com",
+    "project_id": "sound-temple-215321",
+    "storage_bucket": "sound-temple-215321.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:97413835492:android:7c7b7738438b21801d9af1",
+        "android_client_info": {
+          "package_name": "com.familymaster"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "97413835492-cfjmat9lpt938v82qmlhbh68uj1tqnpd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.familymaster",
+            "certificate_hash": "328dbc1adabdb1609235df8d266411f6aa4743c9"
+          }
+        },
+        {
+          "client_id": "97413835492-sv5ate5vb1qdc1nhvnnm8mjbg1b59qst.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXlApigmX3i83auKeGQuFdx9QDFsGjKQo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "97413835492-sv5ate5vb1qdc1nhvnnm8mjbg1b59qst.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:97413835492:android:62c10be7d32d762e1d9af1",
+        "android_client_info": {
+          "package_name": "com.home_master"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "97413835492-sv5ate5vb1qdc1nhvnnm8mjbg1b59qst.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXlApigmX3i83auKeGQuFdx9QDFsGjKQo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "97413835492-sv5ate5vb1qdc1nhvnnm8mjbg1b59qst.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
