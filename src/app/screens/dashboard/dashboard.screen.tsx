@@ -3,17 +3,17 @@ import { collection } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { Platform, View } from 'react-native';
 import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
-import { BottomNavigation, Text } from 'react-native-paper';
-import { db } from '../../../environments/firebaseConfig';
-import common from '../../constants/common/common';
-import dashboardStyle from './dashboard.style';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import colors from '../../constants/common/colors';
-import fontSize from '../../constants/common/font.size';
 import LinearGradient from 'react-native-linear-gradient';
+import { Text } from 'react-native-paper';
 import SegmentedControlTab from "react-native-segmented-control-tab";
-import TransactionItem from '../../components/TransactionItem';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { db } from '../../../environments/firebaseConfig';
 import { BottomTab } from '../../components/BottomTab';
+import TransactionItem from '../../components/TransactionItem';
+import colors from '../../constants/common/colors';
+import common from '../../constants/common/common';
+import fontSize from '../../constants/common/font.size';
+import dashboardStyle from './dashboard.style';
 
 const DashboardScreen = (props) => {
 
@@ -86,7 +86,7 @@ const DashboardScreen = (props) => {
             selectedIndex={tabIndex}
             borderRadius={20}
             tabsContainerStyle={{ backgroundColor: 'transparent', borderWidth: 1, borderColor: colors.WHITE, borderRadius: 20 }}
-            tabStyle={{ backgroundColor: 'transparent', borderColor: colors.WHITE, borderWidth: 0 }}
+            tabStyle={{ backgroundColor: 'transparent', borderColor: colors.WHITE, borderWidth: 0, paddingVertical: 10 }}
             tabBadgeStyle={{ borderWidth: 0 }}
             tabTextStyle={{ color: colors.WHITE, fontSize: fontSize.T }}
             activeTabStyle={{ backgroundColor: colors.BLACK, borderRadius: 20 }}
@@ -101,7 +101,9 @@ const DashboardScreen = (props) => {
           <TransactionItem amount={7500} itemType={"Income"} add={true} />
         </View>
       </View>
-    </ScrollView><BottomTab /></>
+    </ScrollView>
+      <BottomTab />
+    </>
   );
 }
 export default DashboardScreen;

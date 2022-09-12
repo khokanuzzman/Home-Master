@@ -1,9 +1,10 @@
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
-import { Appbar, Text } from 'react-native-paper';
+import { StyleSheet } from 'react-native';
+import { Appbar } from 'react-native-paper';
 import { useDispatch } from 'react-redux';
+import { BottomTab } from '../components/BottomTab';
 import colors from '../constants/common/colors';
 import common from '../constants/common/common';
 import fontSize from '../constants/common/font.size';
@@ -11,7 +12,6 @@ import { ForgotPasswordScreen, HomeScreen, LoginScreen, RegisterScreen } from '.
 import DashboardScreen from '../screens/dashboard/dashboard.screen';
 import profileForm from '../screens/profile/form/profile.form';
 import ProfileScreen from '../screens/profile/profile.screen';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 
 
 const Stack = createStackNavigator();
@@ -45,9 +45,9 @@ export const RootStackNavigator = (props) => {
                                 titleStyle={{
                                     fontSize: fontSize.M,
                                     color: colors.
-                                    TOP_BAR_TEXT_COLOR,
+                                        TOP_BAR_TEXT_COLOR,
                                     textAlign: 'center',
-                                    textTransform:'capitalize'
+                                    textTransform: 'capitalize'
                                 }}
                                 style={{ alignItems: 'center' }}
                             />
@@ -78,6 +78,9 @@ export const RootStackNavigator = (props) => {
                 headerShown: true,
             }} />
             <Stack.Screen name='profileForm' component={profileForm} options={{
+                headerShown: true,
+            }} />
+            <Stack.Screen name='bottomTab' component={BottomTab} options={{
                 headerShown: true,
             }} />
         </Stack.Navigator>

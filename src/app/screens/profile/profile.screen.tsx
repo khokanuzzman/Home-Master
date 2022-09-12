@@ -7,7 +7,7 @@ import { authInfo } from '../../constants/common/common_function';
 
 const ProfileScreen = (props: any) => {
     const user = authInfo();
-    const {email} = props.route.params ? props.route.params: [];
+    const { email } = props?.route?.params ? props?.route?.params : [];
     const [userInfo, setUserInfo] = useState(null);
 
     const readData = async () => {
