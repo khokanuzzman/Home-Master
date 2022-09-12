@@ -7,19 +7,13 @@ import { authInfo } from '../../constants/common/common_function';
 
 const ProfileScreen = (props: any) => {
     const user = authInfo();
+    const {email} = props.route.params ? props.route.params: [];
     const [userInfo, setUserInfo] = useState(null);
-    // const getUsers = async () => {
-    //     const users = await firestore().collection('users').get();
-    //     console.log("users:", users);
-    //     return users;
-    // }
-    // console.log(getUsers());
 
     const readData = async () => {
-        const email = user?.email;
         const myDoc = doc(db, "users", email);
         getDoc(myDoc).then(async (snapshot) => {
-            if (snapshot.exists) {
+            if (snapshot.exists()) {
                 const data = await snapshot.data();
                 setUserInfo(data);
             }

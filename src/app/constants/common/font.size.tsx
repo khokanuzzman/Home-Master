@@ -7,9 +7,10 @@ export default {
     T: 14,
     XT: 12,
     TITLE: 18,
-    SUBTITLE: 16,
+    SIXTEEN: 16,
     DEFAULT: 14,
     SUBTEXT: 12,
     XXT: 10,
-    L_ICON:30
+    L_ICON:30,
+    L_40:40
 }

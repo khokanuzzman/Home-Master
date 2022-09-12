@@ -6,12 +6,16 @@ import { db } from '../../../../environments/firebaseConfig';
 import { authInfo } from '../../../constants/common/common_function';
 
 const profileForm = (props: any) => {
+    const {email} = props.route.params ? props.route.params: [];
+    const user = authInfo();
     const [name, setName] = React.useState("");
-    const [email, setEmail] = React.useState("");
+    const [emailInput, setEmailInput] = React.useState(email? email:"");
     const [phone, setPhone] = React.useState("");
     const [initializing, setInitializing] = useState(true);
     const userRefCollection = collection(db, "users");
-    const user = authInfo();
+    
+
+
     const create = () => {
         console.log("cliked");
         // data.name = name;
@@ -19,8 +23,8 @@ const profileForm = (props: any) => {
         // data.phone = phone;
         // for create setDoc, for update updateDoc
 
-        updateDoc(doc(db, "users", user?.email), {
-            email: user?.email,
+        updateDoc(doc(db, "users", email), {
+            email: email,
             name: name,
             phone: phone
         })
@@ -42,9 +46,9 @@ const profileForm = (props: any) => {
             />
             <TextInput
                 label="email"
-                value={user?.email ? user.email : email}
+                value={emailInput}
                 mode="outlined"
-                onChangeText={text => setEmail(text)}
+                onChangeText={text => setEmailInput(text)}
             />
             <TextInput
                 label="phone"

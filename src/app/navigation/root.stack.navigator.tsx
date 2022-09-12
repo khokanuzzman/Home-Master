@@ -1,8 +1,8 @@
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
-import { StyleSheet } from 'react-native';
-import { Appbar } from 'react-native-paper';
+import { Platform, StyleSheet, View } from 'react-native';
+import { Appbar, Text } from 'react-native-paper';
 import { useDispatch } from 'react-redux';
 import colors from '../constants/common/colors';
 import common from '../constants/common/common';
@@ -11,11 +11,12 @@ import { ForgotPasswordScreen, HomeScreen, LoginScreen, RegisterScreen } from '.
 import DashboardScreen from '../screens/dashboard/dashboard.screen';
 import profileForm from '../screens/profile/form/profile.form';
 import ProfileScreen from '../screens/profile/profile.screen';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 
 const Stack = createStackNavigator();
 
-export const RootStackNavigator = () => {
+export const RootStackNavigator = (props) => {
     const dispatch = useDispatch();
 
     return (
@@ -32,22 +33,23 @@ export const RootStackNavigator = () => {
 
                     return (
                         <Appbar.Header
-                            style={{ backgroundColor: colors.WHITE, elevation: 0 }}>
+                            style={{ backgroundColor: colors.BAKCGROUND, elevation: 0 }}>
                             {progress.previous
                                 ? (<Appbar.BackAction onPress={navigation.goBack} color={colors.GREEN} />) : (
-                                    <Appbar.Action icon='menu' color={colors.GREEN} size={common.ICON_SIZE} onPress={() => {
+                                    <Appbar.Action icon='menu' color={colors.TOP_BAR_TEXT_COLOR} size={common.ICON_SIZE} onPress={() => {
                                         ((navigation as any) as DrawerNavigationProp<{}>).openDrawer();
                                     }} />
                                 )}
                             <Appbar.Content
-                                title={title.toString()}
+                                title={title.toString().toLocaleLowerCase()}
                                 titleStyle={{
                                     fontSize: fontSize.M,
-                                    color: colors.GREEN,
-                                    textAlign: 'left',
-                                    left: -20
+                                    color: colors.
+                                    TOP_BAR_TEXT_COLOR,
+                                    textAlign: 'center',
+                                    textTransform:'capitalize'
                                 }}
-                                style={{ alignItems: 'flex-start' }}
+                                style={{ alignItems: 'center' }}
                             />
                         </Appbar.Header>
                     );

@@ -1,5 +1,5 @@
 import auth from '@react-native-firebase/auth';
-import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
+import { DrawerContent, DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import React, { useEffect, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import { Colors, Divider, IconButton, Text } from 'react-native-paper';
@@ -9,6 +9,7 @@ import colors from '../../../constants/common/colors';
 import common from '../../../constants/common/common';
 import { logoutFn } from '../../../constants/common/common_function';
 import fontSize from '../../../constants/common/font.size';
+import drawerStyle from './drawer.content.style';
 
 
 
@@ -39,46 +40,56 @@ export const DrawerLeftContent = (props) => {
                 }}
                 {...props}>
                 <DrawerContentScrollView>
-                    <View style={{ height: 300, justifyContent: 'center', alignItems: 'center' }}>
-                        <Ionicons name={props.icon || (Platform.OS === 'android' ? 'md-person-circle-outline' : 'ios-person-circle-outline')} size={150} color={colors.GREEN} />
-                        <Text style={{ color: Colors.white }}>{user?.email}</Text>
+                    <View style={drawerStyle.headerSection}>
+                        <Ionicons style={{flex:1,textAlign:"center"}} name={props.icon || (Platform.OS === 'android' ? 'md-person-circle-outline' : 'ios-person-circle-outline')} size={100} color={colors.VOILET} />
+                        <View style={{flex:1.5}}>
+                        <Text style={{color:colors.LIGHT_TEXT_COLOR}}>username</Text>
+                        <Ionicons style={{flex:1,position:'absolute',right:15,top:-5}} 
+                        onPress={() => props.navigation.navigate('profileForm',{email: user?.email})}
+                        name={props.icon || (Platform.OS === 'android' ? 'md-create-outline' : 'ios-person-create-outline')} size={25} color={colors.VOILET} />
+                        <Text style={{ color: colors.TEXT,fontSize:fontSize.SIXTEEN,fontWeight:"bold" }}>{"Md Khokanuzzaman"}</Text>
+                        </View>
                     </View>
-                    <View style={{ flexDirection: 'row', alignContent: 'center', alignItems: 'center' }}>
+                    <View style={drawerStyle.itemWrapper}>
+                        <View style={{ flexDirection: 'row', alignContent: 'center', alignItems: 'center', }}>
+                            <DrawerItem
+                                icon={({ color, size }) => (
+                                    <Ionicons style={drawerStyle.iconStyle}  name={props.icon || (Platform.OS === 'android' ? 'md-wallet-outline' : 'ios-wallet-outline')} size={50} color={colors.VOILET} />
+                                )}
+                                labelStyle={styles.itemLabel}
+                                label='Account'
+                                style={{ flex: 1 }}
+                                onPress={() => { props.navigation.navigate("profile",{email: user?.email}) }}
+                            />
+                        </View>
                         <DrawerItem
                             icon={({ color, size }) => (
-                                <Ionicons name={props.icon || (Platform.OS === 'android' ? 'md-person-circle-outline' : 'ios-person-circle-outline')} size={50} color={colors.GREEN} />
+                                <Ionicons style={drawerStyle.iconStyle}  name={props.icon || (Platform.OS === 'android' ? 'md-stats-chart-outline' : 'ios-stats-chart-outline')} size={50} color={colors.VOILET} />
                             )}
-                            labelStyle={styles.itemColor}
-                            label='profile'
-                            style={{ flex: 1 }}
-                            onPress={() => { props.navigation.navigate("profile") }}
-                        />
+                            labelStyle={styles.itemLabel}
+                            label='Report'
+                            onPress={() => { }}
 
-                        <IconButton
-                            icon="account-edit"
-                            color={Colors.white}
-                            size={20}
-                            onPress={() => props.navigation.navigate('profileForm')}
+                        />
+                        <DrawerItem
+                            icon={({ color, size }) => (
+                                <Ionicons style={drawerStyle.iconStyle}  name={props.icon || (Platform.OS === 'android' ? 'md-settings-outline' : 'ios-settings-outline')} size={50} color={colors.VOILET} />
+                            )}
+                            labelStyle={styles.itemLabel}
+                            label='Settings'
+                            onPress={() => { }}
+
+                        />
+                        <DrawerItem
+                            icon={({ color, size }) => (
+                                <Ionicons style={drawerStyle.iconStyle} name={props.icon || (Platform.OS === 'android' ? 'md-log-out-outline' : 'ios-log-out-outline')} size={50} color={colors.ERROR} />
+                            )}
+                            labelStyle={styles.itemLabel}
+                            label='Logout'
+                            onPress={() => { logoutFn(props) }}
+
                         />
                     </View>
-                    <DrawerItem
-                        icon={({ color, size }) => (
-                            <Ionicons name={props.icon || (Platform.OS === 'android' ? 'md-person-circle-outline' : 'ios-person-circle-outline')} size={50} color={colors.GREEN} />
-                        )}
-                        labelStyle={styles.itemColor}
-                        label='Report'
-                        onPress={() => { }}
-
-                    />
-                    <DrawerItem
-                        icon={({ color, size }) => (
-                            <Ionicons name={props.icon || (Platform.OS === 'android' ? 'md-log-out-outline' : 'ios-log-out-outline')} size={50} color={colors.GREEN} />
-                        )}
-                        labelStyle={styles.itemColor}
-                        label='Logout'
-                        onPress={() => { logoutFn(props) }}
-
-                    />
                 </DrawerContentScrollView>
             </DrawerContentScrollView>
             <Divider />
@@ -116,11 +127,12 @@ const styles = StyleSheet.create({
         textDecorationLine: 'underline'
     },
 
-    itemColor: {
-        color: colors.WHITE,
+    itemLabel: {
+        color: colors.DRAWER_TEXT_COLOR,
+        fontSize: fontSize.SIXTEEN
     },
 
-    optionsItemColor: {
+    iconStyle: {
 
     },
     optionLabelStyle: {
