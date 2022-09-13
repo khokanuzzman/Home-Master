@@ -15,5 +15,6 @@ export default {
     screenHeight: windowHeight,
     DEFAULT_ICON: 18,
     BORDER_RADIUS_10:10,
-    SECTION_HEIGHT_200:200
+    SECTION_HEIGHT_200:200,
+    THREE:3,
 }

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Platform, View } from 'react-native';
 import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
 import LinearGradient from 'react-native-linear-gradient';
-import { Text } from 'react-native-paper';
+import { Avatar, Divider, Text } from 'react-native-paper';
 import SegmentedControlTab from "react-native-segmented-control-tab";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { db } from '../../../environments/firebaseConfig';
@@ -14,9 +14,10 @@ import colors from '../../constants/common/colors';
 import common from '../../constants/common/common';
 import fontSize from '../../constants/common/font.size';
 import dashboardStyle from './dashboard.style';
+import database from '@react-native-firebase/database';
 
 const DashboardScreen = (props) => {
-
+  const reference = database().ref('/users/123');
   // Set an initializing state whilst Firebase connects
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState();
@@ -28,29 +29,37 @@ const DashboardScreen = (props) => {
     setUser(user);
     if (initializing) setInitializing(false);
   }
-
+  console.log(reference);
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
     return subscriber; // unsubscribe on unmount
   }, []);
 
   if (initializing) return null;
-  console.log('userCollection', userCollection);
 
   return (
     <><ScrollView style={dashboardStyle.container}>
       <View style={{ flex: 1 }}>
         <LinearGradient style={[dashboardStyle.headersSection, dashboardStyle.shadow]} colors={['#FFF6E5', '#BAA9A5']} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}>
-          <View style={dashboardStyle.headersSectionTopBar}>
+          <TouchableOpacity onPress={() => props.navigation.openDrawer()} style={dashboardStyle.headersSectionTopBar}>
             <View>
               <Text>Monday</Text>
               <Text>November</Text>
             </View>
             <View style={dashboardStyle.headerSectionTopBarUser}>
-              <Ionicons name={props.icon || (Platform.OS === 'android' ? 'md-person-circle-outline' : 'ios-settings-outline')} size={40} color={colors.VOILET} />
+              <View style={{
+                borderWidth: 2,
+                borderRadius: 50,
+                padding:common.THREE,
+                borderColor: colors.IMAGE_BORDER_COLOR,
+                marginRight:common.THREE
+              }}>
+                <Avatar.Image size={50} source={require('../../../assets/user.png')} />
+              </View>
               <Text style={{ textTransform: "uppercase" }}>Nusrat</Text>
             </View>
-          </View>
+          </TouchableOpacity>
+          <Divider style={{ marginTop: common.TEN }} />
           <View style={dashboardStyle.accounts}>
             <Text style={{ color: colors.LIGHT_TEXT_COLOR, textTransform: 'capitalize' }}>account balance</Text>
             <View style={dashboardStyle.balance}>
@@ -102,7 +111,7 @@ const DashboardScreen = (props) => {
         </View>
       </View>
     </ScrollView>
-      <BottomTab />
+      {/* <BottomTab /> */}
     </>
   );
 }

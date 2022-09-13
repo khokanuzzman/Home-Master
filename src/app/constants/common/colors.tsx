@@ -23,5 +23,6 @@ export default {
     TOP_BAR_TEXT_COLOR:'#212325',
     VOILET:'#7F3DFF',
     LIGHT_TEXT_COLOR:"#91919F",
-    BLACK:"#000"
+    BLACK:"#000",
+    IMAGE_BORDER_COLOR:"#7F3DFF"
 }

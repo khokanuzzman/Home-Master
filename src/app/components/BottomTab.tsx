@@ -1,8 +1,9 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useRef, useState } from 'react';
 import {
-  Alert, Animated, Platform,
+  Alert, Animated, Button, Platform,
   StyleSheet,
+  Text,
   TouchableOpacity,
   View
 } from 'react-native';
@@ -10,12 +11,22 @@ import { CurvedBottomBar } from 'react-native-curved-bottom-bar';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import colors from '../constants/common/colors';
 import { RootStackNavigator } from '../navigation/root.stack.navigator';
+import Modal from "react-native-modal"
+import { IconButton, Portal, Provider } from 'react-native-paper';
+import AddTransactionForm from './AddTransaction';
+import common from '../constants/common/common';
 
 
 export const BottomTab = (props) => {
   const navigation = useNavigation();
   const ref = useRef<any>(null);
   const [type, setType] = useState<'DOWN' | 'UP'>('DOWN');
+  const [isModalVisible, setModalVisible] = useState(false);
+
+  const toggleModal = () => {
+    console.log("clicked!")
+    setModalVisible(!isModalVisible);
+  };
 
   const RenderScreen = () => {
     return (
@@ -66,7 +77,6 @@ export const BottomTab = (props) => {
     );
   };
   const renderTabBar = ({ routeName, selectedTab, navigate }: any) => {
-    console.log("navigate:", routeName, selectedTab, navigate);
     return (
       <TouchableOpacity
         onPress={() => navigation.navigate(routeName)}
@@ -80,53 +90,83 @@ export const BottomTab = (props) => {
     );
   };
 
-  return (
-    <CurvedBottomBar.Navigator
-      ref={ref}
-      type={type}
-      style={styles.bottomBar}
-      strokeWidth={0.5}
-      height={55}
-      circleWidth={55}
-      bgColor="white"
-      initialRouteName="profile"
-      borderTopLeftRight
-      renderCircle={({ selectedTab, navigate }) => (
-        <Animated.View style={styles.btnCircle}>
-          <TouchableOpacity
-            style={{
-              flex: 1,
-              justifyContent: 'center',
-            }}
-            onPress={() => Alert.alert('Click Action')}>
-            <Ionicons name={'apps-sharp'} color="gray" size={25} />
-          </TouchableOpacity>
-        </Animated.View>
-      )}
-      tabBar={renderTabBar}
-    >
-      <CurvedBottomBar.Screen
-        name="home"
-        position="LEFT"
-        component={RootStackNavigator}
-      />
-      <CurvedBottomBar.Screen
-        name="expenses"
-        position="LEFT"
-        component={RenderScreen}
-      />
-      <CurvedBottomBar.Screen
-        name="title2"
-        component={RenderScreen}
-        position="RIGHT"
-      />
+  const addTransaction = () => {
+    return (
+      <Modal isVisible={true}>
+        <View style={{ flex: 1 }}>
+          <Text>Hello!</Text>
 
-      <CurvedBottomBar.Screen
-        name="profile"
-        component={RenderScreen}
-        position="RIGHT"
-      />
-    </CurvedBottomBar.Navigator>
+          <Button title="Hide modal" onPress={toggleModal} />
+        </View>
+      </Modal>
+    );
+  };
+
+  return (
+    <>
+      <View>
+        <Provider>
+          <Portal>
+            <Modal style={{ flex: 1, backgroundColor: colors.WHITE,borderRadius:common.TEN }} isVisible={isModalVisible} onDismiss={() => { setModalVisible(false) }}>
+              <IconButton
+                style={{position:'absolute',right:0,top:0,zIndex:99999}}
+                icon="close-box"
+                color={colors.RED}
+                size={30}
+                onPress={() => { setModalVisible(false) }}
+              />
+              <AddTransactionForm />
+            </Modal>
+          </Portal>
+        </Provider>
+      </View><CurvedBottomBar.Navigator
+        ref={ref}
+        type={type}
+        style={styles.bottomBar}
+        strokeWidth={0.5}
+        height={55}
+        circleWidth={55}
+        bgColor="white"
+        initialRouteName="home"
+        borderTopLeftRight
+        screenOptions={{
+          headerShown: false,
+        }}
+        renderCircle={({ selectedTab, navigate }) => (
+          <Animated.View style={styles.btnCircle}>
+            <TouchableOpacity
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+              }}
+              onPress={() => toggleModal()}>
+              <Ionicons name={'add-outline'} color="gray" size={25} />
+            </TouchableOpacity>
+          </Animated.View>
+        )}
+        tabBar={renderTabBar}
+      >
+        <CurvedBottomBar.Screen
+          options={{
+            headerShown: false,
+          }}
+          name="home"
+          position="LEFT"
+          component={RootStackNavigator} />
+        <CurvedBottomBar.Screen
+          name="expenses"
+          position="LEFT"
+          component={RenderScreen} />
+        <CurvedBottomBar.Screen
+          name="title2"
+          component={RenderScreen}
+          position="RIGHT" />
+
+        <CurvedBottomBar.Screen
+          name="profile"
+          component={RenderScreen}
+          position="RIGHT" />
+      </CurvedBottomBar.Navigator></>
   );
 };
 
@@ -134,6 +174,7 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor: colors.WHITE
   },
   button: {
     marginVertical: 5,

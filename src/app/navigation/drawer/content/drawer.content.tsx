@@ -2,7 +2,7 @@ import auth from '@react-native-firebase/auth';
 import { DrawerContent, DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import React, { useEffect, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
-import { Colors, Divider, IconButton, Text } from 'react-native-paper';
+import { Avatar, Colors, Divider, IconButton, Text } from 'react-native-paper';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useDispatch } from 'react-redux';
 import colors from '../../../constants/common/colors';
@@ -41,30 +41,39 @@ export const DrawerLeftContent = (props) => {
                 {...props}>
                 <DrawerContentScrollView>
                     <View style={drawerStyle.headerSection}>
-                        <Ionicons style={{flex:1,textAlign:"center"}} name={props.icon || (Platform.OS === 'android' ? 'md-person-circle-outline' : 'ios-person-circle-outline')} size={100} color={colors.VOILET} />
-                        <View style={{flex:1.5}}>
-                        <Text style={{color:colors.LIGHT_TEXT_COLOR}}>username</Text>
-                        <Ionicons style={{flex:1,position:'absolute',right:15,top:-5}} 
-                        onPress={() => props.navigation.navigate('profileForm',{email: user?.email})}
-                        name={props.icon || (Platform.OS === 'android' ? 'md-create-outline' : 'ios-person-create-outline')} size={25} color={colors.VOILET} />
-                        <Text style={{ color: colors.TEXT,fontSize:fontSize.SIXTEEN,fontWeight:"bold" }}>{"Md Khokanuzzaman"}</Text>
+                        <View style={{
+                            borderWidth: 2,
+                            borderRadius: 50,
+                            padding: common.THREE,
+                            borderColor: colors.IMAGE_BORDER_COLOR,
+                            marginRight: common.THREE,
+                            marginHorizontal:common.TEN
+                        }}>
+                            <Avatar.Image size={70} source={require('../../../../assets/user.png')} />
+                        </View>
+                        <View style={{ flex: 1.5 }}>
+                            <Text style={{ color: colors.LIGHT_TEXT_COLOR }}>username</Text>
+                            <Ionicons style={{ flex: 1, position: 'absolute', right: 15, top: -5 }}
+                                onPress={() => props.navigation.navigate('profileForm', { email: user?.email })}
+                                name={props.icon || (Platform.OS === 'android' ? 'md-create-outline' : 'ios-person-create-outline')} size={25} color={colors.VOILET} />
+                            <Text style={{ color: colors.TEXT, fontSize: fontSize.SIXTEEN, fontWeight: "bold" }}>{"Nusrat Jahan"}</Text>
                         </View>
                     </View>
                     <View style={drawerStyle.itemWrapper}>
                         <View style={{ flexDirection: 'row', alignContent: 'center', alignItems: 'center', }}>
                             <DrawerItem
                                 icon={({ color, size }) => (
-                                    <Ionicons style={drawerStyle.iconStyle}  name={props.icon || (Platform.OS === 'android' ? 'md-wallet-outline' : 'ios-wallet-outline')} size={50} color={colors.VOILET} />
+                                    <Ionicons style={drawerStyle.iconStyle} name={props.icon || (Platform.OS === 'android' ? 'md-wallet-outline' : 'ios-wallet-outline')} size={50} color={colors.VOILET} />
                                 )}
                                 labelStyle={styles.itemLabel}
                                 label='Account'
                                 style={{ flex: 1 }}
-                                onPress={() => { props.navigation.navigate("profile",{email: user?.email}) }}
+                                onPress={() => { props.navigation.navigate("profile", { email: user?.email }) }}
                             />
                         </View>
                         <DrawerItem
                             icon={({ color, size }) => (
-                                <Ionicons style={drawerStyle.iconStyle}  name={props.icon || (Platform.OS === 'android' ? 'md-stats-chart-outline' : 'ios-stats-chart-outline')} size={50} color={colors.VOILET} />
+                                <Ionicons style={drawerStyle.iconStyle} name={props.icon || (Platform.OS === 'android' ? 'md-stats-chart-outline' : 'ios-stats-chart-outline')} size={50} color={colors.VOILET} />
                             )}
                             labelStyle={styles.itemLabel}
                             label='Report'
@@ -73,7 +82,7 @@ export const DrawerLeftContent = (props) => {
                         />
                         <DrawerItem
                             icon={({ color, size }) => (
-                                <Ionicons style={drawerStyle.iconStyle}  name={props.icon || (Platform.OS === 'android' ? 'md-settings-outline' : 'ios-settings-outline')} size={50} color={colors.VOILET} />
+                                <Ionicons style={drawerStyle.iconStyle} name={props.icon || (Platform.OS === 'android' ? 'md-settings-outline' : 'ios-settings-outline')} size={50} color={colors.VOILET} />
                             )}
                             labelStyle={styles.itemLabel}
                             label='Settings'
