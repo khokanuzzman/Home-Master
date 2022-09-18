@@ -1,4 +1,4 @@
-import { useNavigation } from '@react-navigation/native';
+import { CommonActions, useNavigation } from '@react-navigation/native';
 import React, { useRef, useState } from 'react';
 import {
   Alert, Animated, Button, Platform,
@@ -15,6 +15,8 @@ import Modal from "react-native-modal"
 import { IconButton, Portal, Provider } from 'react-native-paper';
 import AddTransactionForm from './AddTransaction';
 import common from '../constants/common/common';
+import { useDispatch } from 'react-redux';
+import * as commonAction from '../../app/store/redux-storage/common/common.action'
 
 
 export const BottomTab = (props) => {
@@ -22,10 +24,10 @@ export const BottomTab = (props) => {
   const ref = useRef<any>(null);
   const [type, setType] = useState<'DOWN' | 'UP'>('DOWN');
   const [isModalVisible, setModalVisible] = useState(false);
-
+  const dispatch = useDispatch()
   const toggleModal = () => {
-    console.log("clicked!")
-    setModalVisible(!isModalVisible);
+    setModalVisible(true);
+    dispatch(commonAction.transactionModalStatus(true));
   };
 
   const RenderScreen = () => {
@@ -39,15 +41,9 @@ export const BottomTab = (props) => {
     );
   };
 
-  const onClickButton = () => {
-    if (type === 'UP') {
-      setType('DOWN');
-      Alert.alert('Change type curve down');
-    } else {
-      setType('UP');
-      Alert.alert('Change type curve up');
-    }
-  };
+
+  console.log(isModalVisible);
+
   const _renderIcon = (routeName: string, selectedTab: string) => {
     let icon = '';
 
@@ -65,7 +61,6 @@ export const BottomTab = (props) => {
         icon = 'person-circle-outline';
         break;
     }
-    console.log("icon:", icon);
     return (
       // <Ionicons
       //   name={icon}
@@ -90,18 +85,6 @@ export const BottomTab = (props) => {
     );
   };
 
-  const addTransaction = () => {
-    return (
-      <Modal isVisible={true}>
-        <View style={{ flex: 1 }}>
-          <Text>Hello!</Text>
-
-          <Button title="Hide modal" onPress={toggleModal} />
-        </View>
-      </Modal>
-    );
-  };
-
   return (
     <>
       <View>
@@ -113,7 +96,9 @@ export const BottomTab = (props) => {
                 icon="close-box"
                 color={colors.RED}
                 size={30}
-                onPress={() => { setModalVisible(false) }}
+                onPress={() => { 
+                  dispatch(commonAction.transactionModalStatus(false));
+                  setModalVisible(false) }}
               />
               <AddTransactionForm />
             </Modal>

@@ -1,21 +1,22 @@
 
 import {
-    SET_USER_LOGGEDIN
+    TRANSECTION_MODAL_STATUS
 } from './common.action';
 
 const status: boolean = false;
 
 const initialState = {
-    auth_status: status
+    transectionStatus: status
     // doctorSearchQuery:doctorSearchQuery
 }
 
 export default (state = initialState, action) => {
+    console.log()
     switch (action.type) {
-        case SET_USER_LOGGEDIN:
+        case TRANSECTION_MODAL_STATUS:
             return {
                 ...state,
-                auth_status: [...action.status]
+                transectionStatus: action.status
             };
 
         default:

@@ -1,8 +1,8 @@
+export const TRANSECTION_MODAL_STATUS = 'TRANSECTION_MODAL_STATUS';
 
-export const SET_USER_LOGGEDIN = 'SET_USER_LOGGEDIN';
-
-export const isLoggedInFn = (status: boolean) => {
-    return dispatch => {
-        dispatch({ type: SET_USER_LOGGEDIN, status: status });
+export const transactionModalStatus = (status:boolean) => {
+    return (dispatch:any) => {
+        console.log("status",status);
+        dispatch({ type: TRANSECTION_MODAL_STATUS, status: status });
     }
 }
