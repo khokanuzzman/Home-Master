@@ -1,4 +1,5 @@
 import auth from '@react-native-firebase/auth';
+import database from '@react-native-firebase/database';
 import { collection } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { Platform, View } from 'react-native';
@@ -8,13 +9,11 @@ import { Avatar, Divider, Text } from 'react-native-paper';
 import SegmentedControlTab from "react-native-segmented-control-tab";
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { db } from '../../../environments/firebaseConfig';
-import { BottomTab } from '../../components/BottomTab';
 import TransactionItem from '../../components/TransactionItem';
 import colors from '../../constants/common/colors';
 import common from '../../constants/common/common';
 import fontSize from '../../constants/common/font.size';
 import dashboardStyle from './dashboard.style';
-import database from '@react-native-firebase/database';
 
 const DashboardScreen = (props) => {
   const reference = database().ref('/users/123');
@@ -29,7 +28,7 @@ const DashboardScreen = (props) => {
     setUser(user);
     if (initializing) setInitializing(false);
   }
-  console.log(reference);
+
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
     return subscriber; // unsubscribe on unmount
@@ -50,9 +49,9 @@ const DashboardScreen = (props) => {
               <View style={{
                 borderWidth: 2,
                 borderRadius: 50,
-                padding:common.THREE,
+                padding: common.THREE,
                 borderColor: colors.IMAGE_BORDER_COLOR,
-                marginRight:common.THREE
+                marginRight: common.THREE
               }}>
                 <Avatar.Image size={50} source={require('../../../assets/user.png')} />
               </View>

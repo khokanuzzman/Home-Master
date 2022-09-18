@@ -1,15 +1,16 @@
-import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
-import { Button, Platform, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
-import colors from '../constants/common/colors';
-import common from '../constants/common/common';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import fontSize from '../constants/common/font.size';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import database from '@react-native-firebase/database';
+import moment from 'moment';
+import React, { useState } from 'react';
+import { Button, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { IconButton, TextInput } from 'react-native-paper';
-import database from '@react-native-firebase/database';
-import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
+import { useDispatch, useSelector } from 'react-redux';
+import * as commonAction from '../../app/store/redux-storage/common/common.action';
+import colors from '../constants/common/colors';
+import common from '../constants/common/common';
+import fontSize from '../constants/common/font.size';
 import { notificationFn } from '../core/notification/notification';
-import { useSelector } from 'react-redux';
 
 
 interface Props {
@@ -23,22 +24,24 @@ interface Props {
 interface TransectionDTO {
     bazarCategory: string
     bazarItem: string
-    price: number
+    price: string
 }
 
 const AddTransactionForm = (props: Props) => {
+    const dispatch = useDispatch();
     const [currentDateData, setCurrentDateData] = useState<TransectionDTO>();
     const transactionStatus = useSelector((state: any) => state.common.transectionStatus);
+    const authInfo = useSelector((state: any) => state.auth.authInfo);
     const [date, setDate] = useState(new Date());
-    const [selectedDate, setSelectedDate] = useState(new Date());
+    const [selectedDate, setSelectedDate] = useState(moment().format('DD-MM-YYYY'));
     const [show, setShow] = useState(false);
-    const [itemPrice, setItemPrice] = React.useState(0);
+    const [itemPrice, setItemPrice] = React.useState<string>(currentDateData?.price || "");
     const [openCategory, setCategory] = useState(false);
     const [valueCateroy, setValueCategory] = useState("");
     const [openItem, setItem] = useState(false);
     const [valueItem, setValueItem] = useState("");
     const db = database();
-    const baseUrl = "home-master"
+    const baseUrl = `home-master/${authInfo.uid}`
 
     const [itemsCategory, setItemsCategory] = useState([
         { label: 'Bazar', value: 'bazar' },
@@ -49,17 +52,21 @@ const AddTransactionForm = (props: Props) => {
         { label: 'Fish', value: 'fish' }
     ]);
 
-    const onChange = (event, selected) => {
+
+    const onChange = async (event, selected = new Date()) => {
+        console.log("calling");
         setShow(false);
         setDate(selected);
-        let currentDate = selected;
-        currentDate = selected.getDate() + "-" + (selected.getMonth() + 1) + "-" + selected.getFullYear();
+        let currentDate = await moment(selected).format('DD-MM-YYYY');
         setSelectedDate(currentDate);
-        console.log("selectedDate", selectedDate);
+        readData(selected)
     };
-
-    console.log(valueCateroy);
-    console.log(valueItem);
+    // console.log("date: ", date);
+    console.log("selectedDate", selectedDate);
+    React.useEffect(() => {
+        onChange(new Date());
+        readData(selectedDate);
+    }, [setShow])
 
     const addExpanses = () => {
         db.ref(`${baseUrl}/expenses/${selectedDate.toString()}`)
@@ -69,37 +76,36 @@ const AddTransactionForm = (props: Props) => {
                 price: itemPrice,
             })
             .then(() => {
-                setValueCategory("null");
-                setValueItem("");
-                setItemPrice(0);
                 notificationFn('Successfully submitted');
-                readData();
+                dispatch(commonAction.transactionModalStatus(false));
             });
     }
 
-    const readData = () => {
+    const readData = (selected) => {
+        const date = moment(selected ? selected : selectedDate).format("DD-MM-YYYY");
+        console.log("date from: ", date)
         database()
-            .ref(`${baseUrl}/expenses/${selectedDate.toString()}`)
+            .ref(`${baseUrl}/expenses/${date ? date : selectedDate}`)
             .once('value')
             .then(snapshot => {
-                // if (snapshot) {
-                    setCurrentDateData(snapshot.val());
-                    // setValueCategory(currentDateData?.bazarCategory)
-                    // setValueItem(currentDateData?.bazarItem);
-                // } else {
-                //     setValueCategory("");
-                //     setValueItem("");
-                // }
-
+                console.log("snapshot val", snapshot.val())
+                console.log("snapshot", snapshot);
+                setCurrentDateData(snapshot.val());
                 console.log(currentDateData);
-
+                if (!snapshot.val()) {
+                    setValueCategory("");
+                    setValueItem("");
+                    setItemPrice("");
+                } else {
+                    setValueCategory(currentDateData?.bazarCategory || "");
+                    setValueItem(currentDateData?.bazarItem || "");
+                    setItemPrice(currentDateData?.price || "");
+                }
             });
     }
-
-    useLayoutEffect(() => {
-        readData();
-    }, [transactionStatus, selectedDate])
-
+    console.log("valueCateroy", valueCateroy);
+    console.log("valueItem", valueItem);
+    console.log("itemPrice", itemPrice);
     return (
         <View style={styles.transactionSectionWrapper}>
             <Text style={{ fontSize: fontSize.XL, textAlign: 'center', color: colors.TEXT, fontWeight: 'bold', marginBottom: common.TEN }}>
@@ -127,7 +133,7 @@ const AddTransactionForm = (props: Props) => {
                 <View style={styles.marginVertical10}>
                     <DropDownPicker
                         open={openCategory}
-                        value={currentDateData?.bazarCategory || valueCateroy}
+                        value={valueCateroy || currentDateData?.bazarCategory}
                         items={itemsCategory}
                         setOpen={setCategory}
                         setValue={setValueCategory}
@@ -138,7 +144,7 @@ const AddTransactionForm = (props: Props) => {
                 <View style={styles.marginVertical10}>
                     <DropDownPicker
                         open={openItem}
-                        value={currentDateData?.bazarItem || valueItem}
+                        value={valueItem || currentDateData?.bazarItem}
                         items={items}
                         setOpen={setItem}
                         setValue={setValueItem}
@@ -148,10 +154,10 @@ const AddTransactionForm = (props: Props) => {
                 <View style={styles.marginVertical10}>
                     <TextInput
                         label="Price"
-                        value={currentDateData?.price || itemPrice}
+                        value={itemPrice || currentDateData?.price}
                         mode={"outlined"}
-                        keyboardType={"numeric"}
-                        onChangeText={text => setItemPrice(parseInt(text))}
+                        // keyboardType={"numeric"}
+                        onChangeText={text => setItemPrice(text)}
                     />
                 </View>
                 {show && (
@@ -166,8 +172,8 @@ const AddTransactionForm = (props: Props) => {
                 {/* <Button onPress={() => setShow(true)} title="Show date picker!" /> */}
                 <View style={styles.marginVertical10}>
                     <Button
-                        disabled={!valueCateroy || !itemsCategory || !itemPrice}
-                        title='Submit'
+                        disabled={!currentDateData}
+                        title={currentDateData ? "Update" : "Submit"}
                         onPress={() => addExpanses()}
                         color={colors.VOILET} />
                 </View>

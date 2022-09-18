@@ -1,8 +1,11 @@
+import auth from '@react-native-firebase/auth';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React, { useEffect, useState } from 'react';
 import { configureFonts, DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
+import { useDispatch } from 'react-redux';
+import * as authAction from '../../app/store/redux-storage/auth/auth.action';
 import colors from '../constants/common/colors';
 import { authInfo, getLoggedStatus } from '../constants/common/common_function';
 import { ForgotPasswordScreen, HomeScreen, LoginScreen, RegisterScreen } from '../screens';
@@ -28,9 +31,15 @@ const DrawerTest = createDrawerNavigator();
 
 const AppNavigationContainer = () => {
     const [loggedIn, setIsLoggedIn] = useState(false);
+    const dispatch = useDispatch();
     // if (initializing) return null;
     const user = authInfo();
-    console.log(user);
+    const fuser = auth().currentUser;
+    console.log(fuser);
+
+    useEffect(() => {
+        dispatch(authAction.authInfo(fuser));
+    })
 
     useEffect(() => {
         getLoggedStatus().then(res => { setIsLoggedIn(Boolean(res)) });

@@ -1,30 +1,29 @@
-import { CommonActions, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import React, { useRef, useState } from 'react';
 import {
-  Alert, Animated, Button, Platform,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
+  Animated, Platform,
+  StyleSheet, TouchableOpacity,
   View
 } from 'react-native';
 import { CurvedBottomBar } from 'react-native-curved-bottom-bar';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import colors from '../constants/common/colors';
-import { RootStackNavigator } from '../navigation/root.stack.navigator';
-import Modal from "react-native-modal"
+import Modal from "react-native-modal";
 import { IconButton, Portal, Provider } from 'react-native-paper';
-import AddTransactionForm from './AddTransaction';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useDispatch, useSelector } from 'react-redux';
+import * as commonAction from '../../app/store/redux-storage/common/common.action';
+import colors from '../constants/common/colors';
 import common from '../constants/common/common';
-import { useDispatch } from 'react-redux';
-import * as commonAction from '../../app/store/redux-storage/common/common.action'
+import { RootStackNavigator } from '../navigation/root.stack.navigator';
+import AddTransactionForm from './AddTransaction';
 
 
 export const BottomTab = (props) => {
   const navigation = useNavigation();
+  const transactionStatus = useSelector((state: any) => state.common.transectionStatus);
   const ref = useRef<any>(null);
   const [type, setType] = useState<'DOWN' | 'UP'>('DOWN');
-  const [isModalVisible, setModalVisible] = useState(false);
-  const dispatch = useDispatch()
+  const [isModalVisible, setModalVisible] = useState(transactionStatus || false);
+  const dispatch = useDispatch();
   const toggleModal = () => {
     setModalVisible(true);
     dispatch(commonAction.transactionModalStatus(true));
@@ -90,15 +89,16 @@ export const BottomTab = (props) => {
       <View>
         <Provider>
           <Portal>
-            <Modal style={{ flex: 1, backgroundColor: colors.WHITE,borderRadius:common.TEN }} isVisible={isModalVisible} onDismiss={() => { setModalVisible(false) }}>
+            <Modal style={{ flex: 1, backgroundColor: colors.WHITE, borderRadius: common.TEN }} isVisible={transactionStatus} onDismiss={() => { setModalVisible(false) }}>
               <IconButton
-                style={{position:'absolute',right:0,top:0,zIndex:99999}}
+                style={{ position: 'absolute', right: 0, top: 0, zIndex: 99999 }}
                 icon="close-box"
                 color={colors.RED}
                 size={30}
-                onPress={() => { 
+                onPress={() => {
                   dispatch(commonAction.transactionModalStatus(false));
-                  setModalVisible(false) }}
+                  setModalVisible(false)
+                }}
               />
               <AddTransactionForm />
             </Modal>

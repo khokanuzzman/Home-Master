@@ -1,10 +1,11 @@
 import { applyMiddleware, combineReducers, createStore } from 'redux';
 import ReduxThunk from 'redux-thunk';
+import authReducer from '../auth/auth.reducer';
 import commonReducer from '../common/common.reducer';
 
 
 const rootReducer = combineReducers({
-  // auth: authReducer,
+  auth: authReducer,
   // appointment: appointmentReducer,
   // patient: patientReducer,
   // rx: rxReducer,

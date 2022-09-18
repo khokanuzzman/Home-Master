@@ -15,8 +15,6 @@ const LoginScreen = (props: any) => {
     const dispatch = useDispatch();
     const [email, setEmail] = useState({ value: '', error: '' });
     const [password, setPassword] = useState({ value: '', error: '' });
-    const [savedEmail, setSavedEmail] = useState("");
-    const [savedPassword, setSavedPassword] = useState("");
 
     const _onLoginPressed = () => {
         const emailError = emailValidator(email.value);
