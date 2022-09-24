@@ -1,9 +1,11 @@
 import { DrawerNavigationProp } from '@react-navigation/drawer';
+import { StackActions, NavigationActions, useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 import { Appbar } from 'react-native-paper';
 import { useDispatch } from 'react-redux';
+import AddTransactionForm from '../components/AddTransaction';
 import { BottomTab } from '../components/BottomTab';
 import colors from '../constants/common/colors';
 import common from '../constants/common/common';
@@ -16,8 +18,15 @@ import ProfileScreen from '../screens/profile/profile.screen';
 
 const Stack = createStackNavigator();
 
-export const RootStackNavigator = (props) => {
+export const RootStackNavigator = ({ navigation }) => {
     const dispatch = useDispatch();
+    const nav = useNavigation();
+
+    // navigation.reset({
+    //     index: 0,
+    //     routes: [{ name: 'dashboard' }],
+    // });
+
 
     return (
         <Stack.Navigator
@@ -55,7 +64,7 @@ export const RootStackNavigator = (props) => {
                     );
                 },
             }}>
-            <Stack.Screen name='home' component={HomeScreen} options={{
+            <Stack.Screen name='dashboard' component={DashboardScreen} options={{
                 headerShown: true,
             }} />
 
@@ -71,9 +80,6 @@ export const RootStackNavigator = (props) => {
             <Stack.Screen name='forgot' component={ForgotPasswordScreen} options={{
                 headerShown: false,
             }} />
-            <Stack.Screen name='dashboard' component={DashboardScreen} options={{
-                headerShown: true,
-            }} />
             <Stack.Screen name='profile' component={ProfileScreen} options={{
                 headerShown: true,
             }} />
@@ -81,6 +87,12 @@ export const RootStackNavigator = (props) => {
                 headerShown: true,
             }} />
             <Stack.Screen name='bottomTab' component={BottomTab} options={{
+                headerShown: true,
+            }} />
+            <Stack.Screen name='addTransection' component={AddTransactionForm} options={{
+                headerShown: true,
+            }} />
+            <Stack.Screen name='root' component={RootStackNavigator} options={{
                 headerShown: true,
             }} />
         </Stack.Navigator>

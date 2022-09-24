@@ -17,143 +17,64 @@ import AddTransactionForm from './AddTransaction';
 import common from '../constants/common/common';
 import { useDispatch } from 'react-redux';
 import * as commonAction from '../../app/store/redux-storage/common/common.action'
+import DashboardScreen from '../screens/dashboard/dashboard.screen';
+import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
+import { HomeScreen } from '../screens';
+import ProfileScreen from '../screens/profile/profile.screen';
 
+const Tab = createMaterialBottomTabNavigator();
 
-export const BottomTab = (props) => {
-  const navigation = useNavigation();
-  const ref = useRef<any>(null);
-  const [type, setType] = useState<'DOWN' | 'UP'>('DOWN');
-  const [isModalVisible, setModalVisible] = useState(false);
-  const dispatch = useDispatch()
-  const toggleModal = () => {
-    setModalVisible(true);
-    dispatch(commonAction.transactionModalStatus(true));
-  };
-
-  const RenderScreen = () => {
-    return (
-      <View
-        style={{
-          backgroundColor: '#BFEFFF',
-          flex: 1,
-        }}
-      />
-    );
-  };
-
-
-  console.log(isModalVisible);
-
-  const _renderIcon = (routeName: string, selectedTab: string) => {
-    let icon = '';
-
-    switch (routeName) {
-      case 'home':
-        icon = 'home-outline';
-        break;
-      case 'expenses':
-        icon = 'wallet-outline';
-        break;
-      case 'title2':
-        icon = 'stats-chart-outline';
-        break;
-      case 'profile':
-        icon = 'person-circle-outline';
-        break;
-    }
-    return (
-      // <Ionicons
-      //   name={icon}
-      //   size={25}
-      //   color={routeName === selectedTab ? 'black' : 'gray'}
-      // />
-      // console.log(icon);
-      <Ionicons name={props.icon || (Platform.OS === 'android' ? 'md-' + icon : 'ios-' + icon)} size={40} color={routeName === selectedTab ? colors.VOILET : 'gray'} />
-    );
-  };
-  const renderTabBar = ({ routeName, selectedTab, navigate }: any) => {
-    return (
-      <TouchableOpacity
-        onPress={() => navigation.navigate(routeName)}
-        style={{
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-        {_renderIcon(routeName, selectedTab)}
-      </TouchableOpacity>
-    );
-  };
-
+export const BottomTab = () => {
   return (
-    <>
-      <View>
-        <Provider>
-          <Portal>
-            <Modal style={{ flex: 1, backgroundColor: colors.WHITE,borderRadius:common.TEN }} isVisible={isModalVisible} onDismiss={() => { setModalVisible(false) }}>
-              <IconButton
-                style={{position:'absolute',right:0,top:0,zIndex:99999}}
-                icon="close-box"
-                color={colors.RED}
-                size={30}
-                onPress={() => { 
-                  dispatch(commonAction.transactionModalStatus(false));
-                  setModalVisible(false) }}
-              />
-              <AddTransactionForm />
-            </Modal>
-          </Portal>
-        </Provider>
-      </View><CurvedBottomBar.Navigator
-        ref={ref}
-        type={type}
-        style={styles.bottomBar}
-        strokeWidth={0.5}
-        height={55}
-        circleWidth={55}
-        bgColor="white"
-        initialRouteName="home"
-        borderTopLeftRight
-        screenOptions={{
-          headerShown: false,
+    <Tab.Navigator
+      initialRouteName="Home"
+      activeColor={colors.VOILET}
+      inactiveColor={colors.DISABLED_COLOR}
+      barStyle={{ backgroundColor: colors.WHITE }}
+    >
+      <Tab.Screen name="Dashboard"
+        options={{
+          tabBarLabel: 'Home',
+          tabBarIcon: ({ color }) => (
+            <Ionicons style={{ height: 28 }} name="home" color={color} size={26} />
+          ),
         }}
-        renderCircle={({ selectedTab, navigate }) => (
-          <Animated.View style={styles.btnCircle}>
-            <TouchableOpacity
-              style={{
-                flex: 1,
-                justifyContent: 'center',
-              }}
-              onPress={() => toggleModal()}>
-              <Ionicons name={'add-outline'} color="gray" size={25} />
-            </TouchableOpacity>
-          </Animated.View>
-        )}
-        tabBar={renderTabBar}
-      >
-        <CurvedBottomBar.Screen
-          options={{
-            headerShown: false,
-          }}
-          name="home"
-          position="LEFT"
-          component={RootStackNavigator} />
-        <CurvedBottomBar.Screen
-          name="expenses"
-          position="LEFT"
-          component={RenderScreen} />
-        <CurvedBottomBar.Screen
-          name="title2"
-          component={RenderScreen}
-          position="RIGHT" />
-
-        <CurvedBottomBar.Screen
-          name="profile"
-          component={RenderScreen}
-          position="RIGHT" />
-      </CurvedBottomBar.Navigator></>
+        component={DashboardScreen} />
+      <Tab.Screen name="Add"
+        options={{
+          tabBarLabel: 'Add',
+          tabBarIcon: ({ color }) => (
+            <Ionicons style={{ height: 28 }} name="add-circle-outline" color={color} size={26} />
+          ),
+        }}
+        component={AddTransactionForm} />
+      <Tab.Screen name="Expanses"
+        options={{
+          tabBarLabel: 'Expanses',
+          tabBarIcon: ({ color }) => (
+            <Ionicons style={{ height: 28 }}  name="wallet-outline" color={color} size={26} />
+          ),
+        }}
+        component={ProfileScreen} />
+      <Tab.Screen name="Report"
+        options={{
+          tabBarLabel: 'Report',
+          tabBarIcon: ({ color }) => (
+            <Ionicons style={{ height: 28 }}  name="stats-chart-outline" color={color} size={26} />
+          ),
+        }}
+        component={ProfileScreen} />
+        <Tab.Screen name="Profile"
+        options={{
+          tabBarLabel: 'Profile',
+          tabBarIcon: ({ color }) => (
+            <Ionicons style={{ height: 28 }}  name="person-circle-outline" color={color} size={26} />
+          ),
+        }}
+        component={ProfileScreen} />
+    </Tab.Navigator>
   );
-};
+}
 
 export const styles = StyleSheet.create({
   container: {

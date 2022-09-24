@@ -10,6 +10,7 @@ import database from '@react-native-firebase/database';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { notificationFn } from '../core/notification/notification';
 import { useSelector } from 'react-redux';
+import { useFocusEffect } from '@react-navigation/native';
 
 
 interface Props {
@@ -30,13 +31,13 @@ const AddTransactionForm = (props: Props) => {
     const [currentDateData, setCurrentDateData] = useState<TransectionDTO>();
     const transactionStatus = useSelector((state: any) => state.common.transectionStatus);
     const [date, setDate] = useState(new Date());
-    const [selectedDate, setSelectedDate] = useState(new Date());
+    const [selectedDate, setSelectedDate] = useState("");
     const [show, setShow] = useState(false);
-    const [itemPrice, setItemPrice] = React.useState(0);
+    const [itemPrice, setItemPrice] = React.useState(currentDateData?.price || "0");
     const [openCategory, setCategory] = useState(false);
-    const [valueCateroy, setValueCategory] = useState("");
+    const [valueCateroy, setValueCategory] = useState(currentDateData?.bazarCategory || "");
     const [openItem, setItem] = useState(false);
-    const [valueItem, setValueItem] = useState("");
+    const [valueItem, setValueItem] = useState(currentDateData?.bazarItem || "");
     const db = database();
     const baseUrl = "home-master"
 
@@ -49,56 +50,56 @@ const AddTransactionForm = (props: Props) => {
         { label: 'Fish', value: 'fish' }
     ]);
 
-    const onChange = (event, selected) => {
-        setShow(false);
-        setDate(selected);
-        let currentDate = selected;
-        currentDate = selected.getDate() + "-" + (selected.getMonth() + 1) + "-" + selected.getFullYear();
-        setSelectedDate(currentDate);
-        console.log("selectedDate", selectedDate);
-    };
+    useEffect(()=>{
 
-    console.log(valueCateroy);
-    console.log(valueItem);
+    },[])
 
     const addExpanses = () => {
         db.ref(`${baseUrl}/expenses/${selectedDate.toString()}`)
             .set({
                 bazarCategory: valueCateroy,
                 bazarItem: valueItem,
-                price: itemPrice,
+                price: itemPrice.toString(),
             })
             .then(() => {
                 setValueCategory("null");
                 setValueItem("");
                 setItemPrice(0);
                 notificationFn('Successfully submitted');
-                readData();
+                // readData(selectedDate);
             });
     }
 
-    const readData = () => {
-        database()
-            .ref(`${baseUrl}/expenses/${selectedDate.toString()}`)
-            .once('value')
-            .then(snapshot => {
-                // if (snapshot) {
-                    setCurrentDateData(snapshot.val());
-                    // setValueCategory(currentDateData?.bazarCategory)
-                    // setValueItem(currentDateData?.bazarItem);
-                // } else {
-                //     setValueCategory("");
-                //     setValueItem("");
-                // }
+    useFocusEffect(
+        React.useCallback(() => {
+        //   readData(selectedDate);
+        }, [selectedDate])
+      );
 
-                console.log(currentDateData);
+      useEffect(() => {
+        const onValueChange = database()
+        .ref(`${baseUrl}/expenses/${selectedDate.toString()}`)
+          .on('value', snapshot => {
+            console.log('User data: ', snapshot.val());
+          });
+    
+        // Stop listening for updates when no longer required
+        return () => database().ref(`${baseUrl}/expenses/${selectedDate.toString()}`).off('value', onValueChange);
+      }, [selectedDate]);
 
-            });
-    }
+    // const readData = (sdate) => {
+    //     console.log(sdate);
+    //     console.log(`${baseUrl}/expenses/${sdate.toString()}`);
+    //     database()
+    //         .ref(`${baseUrl}/expenses/${sdate.toString()}`)
+    //         .once('value')
+    //         .then((snapshot) => {
+    //             console.log(sdate);
+    //                 setCurrentDateData(snapshot.val());
+    //                 console.log(currentDateData);
 
-    useLayoutEffect(() => {
-        readData();
-    }, [transactionStatus, selectedDate])
+    //         });
+    // }
 
     return (
         <View style={styles.transactionSectionWrapper}>
@@ -108,7 +109,7 @@ const AddTransactionForm = (props: Props) => {
             <View style={[styles.transactionSection]}>
                 <View style={[styles.marginVertical10, { position: 'relative' }]}>
                     <TextInput
-                        label="Price"
+                        label="select a date"
                         value={selectedDate.toLocaleString()}
                         mode={"outlined"}
                         editable={false}
@@ -160,7 +161,14 @@ const AddTransactionForm = (props: Props) => {
                         value={date}
                         is24Hour={true}
                         mode={"date"}
-                        onChange={onChange}
+                        onChange={(event, selected)=>{
+                            setShow(false);
+                            setDate(selected);
+                            let currentDate;
+                            currentDate = selected.getDate() + "-" + (selected.getMonth() + 1) + "-" + selected.getFullYear();
+                            setSelectedDate(currentDate);
+                            // readData(currentDate);
+                        }}
                     />
                 )}
                 {/* <Button onPress={() => setShow(true)} title="Show date picker!" /> */}
