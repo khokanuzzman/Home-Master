@@ -19,14 +19,14 @@ export const BottomTab = () => {
     <Tab.Navigator
       initialRouteName="Home"
       activeColor={colors.VOILET}
-      inactiveColor={colors.DISABLED_COLOR}
-      barStyle={{ backgroundColor: colors.WHITE }}
+      inactiveColor={c}
+      barStyle={{ backgroundColor: '#fff' }}
     >
       <Tab.Screen name="Dashboard"
         options={{
           tabBarLabel: 'Home',
           tabBarIcon: ({ color }) => (
-            <Ionicons style={{ height: 28 }} name="home" color={color} size={26} />
+            <Ionicons name="home" color={color} size={26} />
           ),
         }}
         component={DashboardScreen} />
@@ -34,7 +34,7 @@ export const BottomTab = () => {
         options={{
           tabBarLabel: 'Add',
           tabBarIcon: ({ color }) => (
-            <Ionicons style={{ height: 28 }} name="add-circle-outline" color={color} size={26} />
+            <Ionicons name="add-circle-outline" color={color} size={26} />
           ),
         }}
         component={AddTransactionForm} />
@@ -42,7 +42,7 @@ export const BottomTab = () => {
         options={{
           tabBarLabel: 'Expanses',
           tabBarIcon: ({ color }) => (
-            <Ionicons style={{ height: 28 }}  name="wallet-outline" color={color} size={26} />
+            <Ionicons name="wallet-outline" color={color} size={26} />
           ),
         }}
         component={ProfileScreen} />
@@ -50,7 +50,7 @@ export const BottomTab = () => {
         options={{
           tabBarLabel: 'Report',
           tabBarIcon: ({ color }) => (
-            <Ionicons style={{ height: 28 }}  name="stats-chart-outline" color={color} size={26} />
+            <Ionicons name="stats-chart-outline" color={color} size={26} />
           ),
         }}
         component={ProfileScreen} />
@@ -58,7 +58,7 @@ export const BottomTab = () => {
         options={{
           tabBarLabel: 'Profile',
           tabBarIcon: ({ color }) => (
-            <Ionicons style={{ height: 28 }}  name="person-circle-outline" color={color} size={26} />
+            <Ionicons name="person-circle-outline" color={color} size={26} />
           ),
         }}
         component={ProfileScreen} />
