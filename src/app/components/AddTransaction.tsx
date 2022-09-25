@@ -51,20 +51,14 @@ const AddTransactionForm = (props: Props) => {
         { label: 'Fish', value: 'fish' }
     ]);
 
-    useEffect(()=>{
-
-    },[])
-
     const addExpanses = () => {
         db.ref(`${baseUrl}/expenses/${selectedDate.toString()}`)
             .set({
                 bazarCategory: valueCateroy,
-                bazarItem: valueItem,
-                price: itemPrice.toString(),
+                bazarItem: [{item: valueItem, price:itemPrice }],
             })
             .then(() => {
                 notificationFn('Successfully submitted');
-                // readData(selectedDate);
             });
     }
 
@@ -72,7 +66,8 @@ const AddTransactionForm = (props: Props) => {
         const onValueChange = database()
         .ref(`${baseUrl}/expenses/${selectedDate.toString()}`)
           .on('value', snapshot => {
-            console.log('User data: ', snapshot.val());
+              setCurrentDateData(snapshot.val()|| null);
+              console.log(snapshot.val());
           });
     
         // Stop listening for updates when no longer required
@@ -152,8 +147,8 @@ const AddTransactionForm = (props: Props) => {
                 {/* <Button onPress={() => setShow(true)} title="Show date picker!" /> */}
                 <View style={styles.marginVertical10}>
                     <Button
-                        disabled={!currentDateData}
-                        title={currentDateData ? "Update" : "Submit"}
+                        disabled={!currentDateData?.bazarCategory && !itemsCategory || !currentDateData?.bazarItem && !valueItem || !currentDateData?.price && !itemPrice}
+                        title='Submit'
                         onPress={() => addExpanses()}
                         color={colors.VOILET} />
                 </View>
