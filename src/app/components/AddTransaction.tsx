@@ -1,16 +1,15 @@
-import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
-import { Button, Platform, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
-import colors from '../constants/common/colors';
-import common from '../constants/common/common';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import fontSize from '../constants/common/font.size';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import database from '@react-native-firebase/database';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import { Button, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { IconButton, TextInput } from 'react-native-paper';
-import database from '@react-native-firebase/database';
-import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
+import { useDispatch, useSelector } from 'react-redux';
+import colors from '../constants/common/colors';
+import common from '../constants/common/common';
+import fontSize from '../constants/common/font.size';
 import { notificationFn } from '../core/notification/notification';
-import { useSelector } from 'react-redux';
-import { useFocusEffect } from '@react-navigation/native';
 
 
 interface Props {
@@ -24,12 +23,14 @@ interface Props {
 interface TransectionDTO {
     bazarCategory: string
     bazarItem: string
-    price: number
+    price: string
 }
 
 const AddTransactionForm = (props: Props) => {
+    const dispatch = useDispatch();
     const [currentDateData, setCurrentDateData] = useState<TransectionDTO>();
     const transactionStatus = useSelector((state: any) => state.common.transectionStatus);
+    const authInfo = useSelector((state: any) => state.auth.authInfo);
     const [date, setDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState("");
     const [show, setShow] = useState(false);
@@ -39,7 +40,7 @@ const AddTransactionForm = (props: Props) => {
     const [openItem, setItem] = useState(false);
     const [valueItem, setValueItem] = useState(currentDateData?.bazarItem || "");
     const db = database();
-    const baseUrl = "home-master"
+    const baseUrl = `home-master/${authInfo.uid}`
 
     const [itemsCategory, setItemsCategory] = useState([
         { label: 'Bazar', value: 'bazar' },
@@ -62,19 +63,10 @@ const AddTransactionForm = (props: Props) => {
                 price: itemPrice.toString(),
             })
             .then(() => {
-                setValueCategory("null");
-                setValueItem("");
-                setItemPrice(0);
                 notificationFn('Successfully submitted');
                 // readData(selectedDate);
             });
     }
-
-    useFocusEffect(
-        React.useCallback(() => {
-        //   readData(selectedDate);
-        }, [selectedDate])
-      );
 
       useEffect(() => {
         const onValueChange = database()
@@ -86,20 +78,6 @@ const AddTransactionForm = (props: Props) => {
         // Stop listening for updates when no longer required
         return () => database().ref(`${baseUrl}/expenses/${selectedDate.toString()}`).off('value', onValueChange);
       }, [selectedDate]);
-
-    // const readData = (sdate) => {
-    //     console.log(sdate);
-    //     console.log(`${baseUrl}/expenses/${sdate.toString()}`);
-    //     database()
-    //         .ref(`${baseUrl}/expenses/${sdate.toString()}`)
-    //         .once('value')
-    //         .then((snapshot) => {
-    //             console.log(sdate);
-    //                 setCurrentDateData(snapshot.val());
-    //                 console.log(currentDateData);
-
-    //         });
-    // }
 
     return (
         <View style={styles.transactionSectionWrapper}>
@@ -128,7 +106,7 @@ const AddTransactionForm = (props: Props) => {
                 <View style={styles.marginVertical10}>
                     <DropDownPicker
                         open={openCategory}
-                        value={currentDateData?.bazarCategory || valueCateroy}
+                        value={valueCateroy || currentDateData?.bazarCategory}
                         items={itemsCategory}
                         setOpen={setCategory}
                         setValue={setValueCategory}
@@ -139,7 +117,7 @@ const AddTransactionForm = (props: Props) => {
                 <View style={styles.marginVertical10}>
                     <DropDownPicker
                         open={openItem}
-                        value={currentDateData?.bazarItem || valueItem}
+                        value={valueItem || currentDateData?.bazarItem}
                         items={items}
                         setOpen={setItem}
                         setValue={setValueItem}
@@ -149,10 +127,10 @@ const AddTransactionForm = (props: Props) => {
                 <View style={styles.marginVertical10}>
                     <TextInput
                         label="Price"
-                        value={currentDateData?.price || itemPrice}
+                        value={itemPrice || currentDateData?.price}
                         mode={"outlined"}
-                        keyboardType={"numeric"}
-                        onChangeText={text => setItemPrice(parseInt(text))}
+                        // keyboardType={"numeric"}
+                        onChangeText={text => setItemPrice(text)}
                     />
                 </View>
                 {show && (
@@ -174,8 +152,8 @@ const AddTransactionForm = (props: Props) => {
                 {/* <Button onPress={() => setShow(true)} title="Show date picker!" /> */}
                 <View style={styles.marginVertical10}>
                     <Button
-                        disabled={!valueCateroy || !itemsCategory || !itemPrice}
-                        title='Submit'
+                        disabled={!currentDateData}
+                        title={currentDateData ? "Update" : "Submit"}
                         onPress={() => addExpanses()}
                         color={colors.VOILET} />
                 </View>
