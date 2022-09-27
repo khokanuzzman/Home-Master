@@ -18,3 +18,12 @@ export const nameValidator = (name: string) => {
 
   return '';
 };
+
+export const weekNumber = (selectedDate: any) => {
+  const d = selectedDate;
+  const date = d.getDate();
+  const day = d.getDay();
+  const weekOfMonth = Math.ceil((date - 1 - day) / 7);
+  // Display the calculated result      
+  return weekOfMonth;
+};
