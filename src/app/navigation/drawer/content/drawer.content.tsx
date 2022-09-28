@@ -9,6 +9,7 @@ import colors from '../../../constants/common/colors';
 import common from '../../../constants/common/common';
 import { logoutFn } from '../../../constants/common/common_function';
 import fontSize from '../../../constants/common/font.size';
+import { currentUser } from '../../../store/redux-storage/auth/auth.action';
 import drawerStyle from './drawer.content.style';
 
 
@@ -54,9 +55,9 @@ export const DrawerLeftContent = (props) => {
                         <View style={{ flex: 1.5 }}>
                             <Text style={{ color: colors.LIGHT_TEXT_COLOR }}>username</Text>
                             <Ionicons style={{ flex: 1, position: 'absolute', right: 15, top: -5 }}
-                                onPress={() => props.navigation.navigate('profileForm', { email: user?.email })}
+                                onPress={() => props.navigation.navigate('profileForm', { email: currentUser?.email })}
                                 name={props.icon || (Platform.OS === 'android' ? 'md-create-outline' : 'ios-person-create-outline')} size={25} color={colors.VOILET} />
-                            <Text style={{ color: colors.TEXT, fontSize: fontSize.SIXTEEN, fontWeight: "bold" }}>{"Nusrat Jahan"}</Text>
+                            <Text style={{ color: colors.TEXT, fontSize: fontSize.SIXTEEN, fontWeight: "bold" }}>{currentUser?.displayName}</Text>
                         </View>
                     </View>
                     <View style={drawerStyle.itemWrapper}>
@@ -68,7 +69,7 @@ export const DrawerLeftContent = (props) => {
                                 labelStyle={styles.itemLabel}
                                 label='Account'
                                 style={{ flex: 1 }}
-                                onPress={() => { props.navigation.navigate("profile", { email: user?.email }) }}
+                                onPress={() => { props.navigation.navigate("profile", { email: currentUser?.email }) }}
                             />
                         </View>
                         <DrawerItem

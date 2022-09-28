@@ -132,5 +132,11 @@ export default StyleSheet.create({
     customBarStyle: {
         alignItems:'flex-start'
     },
-    customBarTitleStyle:{ fontSize: fontSize.M, color: colors.GREEN, textAlign: 'center',left:-common.TWENTEE}
+    customBarTitleStyle:{ fontSize: fontSize.M, color: colors.GREEN, textAlign: 'center',left:-common.TWENTEE},
+    budgetAlert:{
+        backgroundColor:colors.DRAWER_BACKGROUND,
+        padding:common.TEN,
+        margin:common.TWENTEE,
+        borderRadius:common.TEN
+    }
 });

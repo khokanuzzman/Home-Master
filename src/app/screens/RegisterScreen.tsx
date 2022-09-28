@@ -11,6 +11,7 @@ import { theme } from '../core/theme';
 import {
   emailValidator, nameValidator, passwordValidator
 } from '../core/utils';
+import { firebase  } from '@react-native-firebase/auth';
 
 
 const RegisterScreen = (props: any) => {
@@ -32,10 +33,15 @@ const RegisterScreen = (props: any) => {
     signupWithEmailPass(email.value, password.value);
   };
 
-  const signupWithEmailPass = (email: string, password: string) => {
+  const signupWithEmailPass = async (email: string, password: string) => {
     auth()
       .createUserWithEmailAndPassword(email, password)
-      .then(() => {
+      .then(async(res) => {
+       await firebase.auth().currentUser?.updateProfile({
+          displayName: name.value,
+          photoURL:""
+        })
+        // Add user account information in Firestore to be retrieved later.
         console.log('User account created & signed in!');
       })
       .catch(error => {

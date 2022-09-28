@@ -11,6 +11,7 @@ import AddTransactionForm from './AddTransaction';
 import DashboardScreen from '../screens/dashboard/dashboard.screen';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import ProfileScreen from '../screens/profile/profile.screen';
+import { RootStackNavigator } from '../navigation/root.stack.navigator';
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -29,7 +30,7 @@ export const BottomTab = () => {
             <Ionicons style={{height: 28}} name="home" color={color} size={26} />
           ),
         }}
-        component={DashboardScreen} />
+        component={RootStackNavigator} />
       <Tab.Screen name="Add"
         options={{
           tabBarLabel: 'Add',

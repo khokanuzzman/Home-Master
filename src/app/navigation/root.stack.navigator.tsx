@@ -11,6 +11,7 @@ import colors from '../constants/common/colors';
 import common from '../constants/common/common';
 import fontSize from '../constants/common/font.size';
 import { ForgotPasswordScreen, HomeScreen, LoginScreen, RegisterScreen } from '../screens';
+import BudgetFormScreen from '../screens/budget/budget.form.screen';
 import DashboardScreen from '../screens/dashboard/dashboard.screen';
 import profileForm from '../screens/profile/form/profile.form';
 import ProfileScreen from '../screens/profile/profile.screen';
@@ -65,7 +66,7 @@ export const RootStackNavigator = ({ navigation }) => {
                 },
             }}>
             <Stack.Screen name='dashboard' component={DashboardScreen} options={{
-                headerShown: true,
+                headerShown: false,
             }} />
 
             <Stack.Screen name='login' component={LoginScreen} options={{
@@ -93,6 +94,9 @@ export const RootStackNavigator = ({ navigation }) => {
                 headerShown: true,
             }} />
             <Stack.Screen name='root' component={RootStackNavigator} options={{
+                headerShown: true,
+            }} />
+            <Stack.Screen name='budgetForm' component={BudgetFormScreen} options={{
                 headerShown: true,
             }} />
         </Stack.Navigator>
