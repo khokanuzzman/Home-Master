@@ -35,7 +35,6 @@ const AppNavigationContainer = () => {
     // if (initializing) return null;
     const user = authInfo();
     const fuser = auth().currentUser;
-    console.log(fuser);
 
     useEffect(() => {
         dispatch(authAction.authInfo(fuser));

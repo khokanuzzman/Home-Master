@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Header } from 'react-native/Libraries/NewAppScreen';
 import { useDispatch } from 'react-redux';
+import * as authAction from '../../../app/store/redux-storage/auth/auth.action';
 import Background from '../../components/Background';
 import Button from '../../components/Button';
 import Logo from '../../components/Logo';
@@ -26,15 +27,16 @@ const LoginScreen = (props: any) => {
             return;
         }
 
-        signInpWithEmailPass(email.value, password.value);
+        signInpWithEmailPass(email.value, password.value)
 
     };
 
     const signInpWithEmailPass = (email: string, password: string) => {
         auth()
             .signInWithEmailAndPassword(email, password)
-            .then(() => {
+            .then((res) => {
                 props.navigation.replace('dashboard');
+                dispatch(authAction.authInfo(res));
             })
             .catch(error => {
                 if (error.code === 'auth/wrong-password') {

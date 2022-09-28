@@ -1,4 +1,3 @@
-import { async } from '@firebase/util';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import database from '@react-native-firebase/database';
 import React, { useEffect, useState } from 'react';
@@ -6,6 +5,7 @@ import { Button, Keyboard, Pressable, StyleProp, StyleSheet, Text, View, ViewSty
 import DropDownPicker from 'react-native-dropdown-picker';
 import { IconButton, Modal, Portal, Provider, TextInput } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
+import { AuthInfo } from '../constants/auth/authDto';
 import colors from '../constants/common/colors';
 import common from '../constants/common/common';
 import fontSize from '../constants/common/font.size';
@@ -28,7 +28,7 @@ const AddTransactionForm = (props: Props) => {
     const [yearlyExpanses, setYearlyExpanses] = useState({});
     const [monthExpanses, setMonthExpanses] = useState({});
     const transactionStatus = useSelector((state: any) => state.common.transectionStatus);
-    const authInfo = useSelector((state: any) => state.auth.authInfo);
+    const authInfo: AuthInfo = useSelector((state) => state.auth.authInfo);
     const [date, setDate] = useState(new Date());
     const [year, setYear] = useState(date.getFullYear());
     const [week, setWeek] = useState<number>(0);
@@ -104,37 +104,12 @@ const AddTransactionForm = (props: Props) => {
                 .update({ total: sum })
                 .then(() => {
                     notificationFn('total Successfully submitted');
-                    sumMonthFn();
                 });
             Keyboard.dismiss()
         }
     }
 
-    const sumMonthFn = async () => {
-        let data = await yearlyExpanses[month][week];
-        // console.log("data: ",data);
-        let sum = 0;
-        let monthTotal = Object.entries(data).map(entry => {
-            let key = entry[0];
-            let value = entry[1];
-            
-        //    console.log(typeof(value));
-           if(typeof(value)==='object'){
-               console.log(typeof(value)==='object');
-                // console.log(value["total"]);
-                sum += parseInt(value["total"]) 
-           }            
-            return sum;
-        });
-        if (sum) {
-            db.ref(`${baseUrl}/expenses/${year}/${month}/${week}/`)
-                .update({ weekTotal: sum })
-                .then(() => {
-                    notificationFn('weekTotal submitted');
-                });
-            Keyboard.dismiss();
-        }
-    }
+
 
     useEffect(() => {
         const onValueChange = database()

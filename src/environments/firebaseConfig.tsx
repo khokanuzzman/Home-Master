@@ -2,6 +2,7 @@
 import { getAnalytics } from "firebase/analytics";
 import { initializeApp } from "firebase/app";
 import { initializeFirestore } from "firebase/firestore";
+import { useSelector } from "react-redux";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -20,7 +21,11 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const authInfo = useSelector((state: any) => state.auth.authInfo);
 const analytics = getAnalytics(app);
 export const db = initializeFirestore(app, {
     experimentalForceLongPolling: true,
 });
+
+export const baseUrl = `home-master/${authInfo.uid}`
+console.log("from firebase config:", baseUrl);

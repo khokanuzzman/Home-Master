@@ -22,7 +22,7 @@ const DashboardScreen = (props) => {
   const [user, setUser] = useState();
   const [userCollection, setUserCollection] = useState();
   const userRefCollection = collection(db, "users");
-  const [tabIndex, setTabIndex] = React.useState(0);
+  const [tabIndex, setTabIndex] = useState(0);
   // Handle user state changes
   const onAuthStateChanged = (user) => {
     setUser(user);
