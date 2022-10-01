@@ -17,29 +17,42 @@ import dashboardStyle from './dashboard.style';
 import { firebase } from '@react-native-firebase/auth';
 import { currentUser } from '../../store/redux-storage/auth/auth.action';
 import styles from '../../constants/common/styles';
+import { budgetUrl } from '../../store/redux-storage/common/common.action';
+import { BudgetDTO } from '../../constants/budget/budgetDTO';
 
 const DashboardScreen = ({navigation}) => {
-  console.log("navigation: ",navigation)
   const reference = database().ref('/users/123');
+  const [tabIndex, setTabIndex] = useState(0);
   // Set an initializing state whilst Firebase connects
   const [initializing, setInitializing] = useState(true);
+  const [budgetData, setBudgetData] = useState<BudgetDTO>();
   const [user, setUser] = useState();
-  const [userCollection, setUserCollection] = useState();
   const userRefCollection = collection(db, "users");
-  const [tabIndex, setTabIndex] = useState<number>(0);
-  console.log(currentUser?.displayName)
+
   // Handle user state changes
   const onAuthStateChanged = (user) => {
     setUser(user);
     if (initializing) setInitializing(false);
   }
 
-  currentUser?.updateProfile({
-    displayName: "Khokan",
-    photoURL: 'https://my-cdn.com/assets/user/123.png',
-  });
+  // currentUser?.updateProfile({
+  //   displayName: "Khokan",
+  //   photoURL: 'https://my-cdn.com/assets/user/123.png',
+  // });
 
   useEffect(() => {
+    console.log("url:",budgetUrl);
+    const onValueChange = database()
+      .ref(budgetUrl)
+      .on('value', snapshot => {
+        setBudgetData(snapshot.val());
+      });
+
+    // Stop listening for updates when no longer required
+    return () => database().ref(budgetUrl).off('value', onValueChange);
+  }, []);
+
+  React.useEffect(() => {
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
     return subscriber; // unsubscribe on unmount
   }, []);
@@ -47,7 +60,7 @@ const DashboardScreen = ({navigation}) => {
 
 
   if (initializing) return null;
-
+console.log("budget data: ",budgetData);
   return (
     <><ScrollView style={dashboardStyle.container}>
       <View style={{ flex: 1 }}>
@@ -65,7 +78,9 @@ const DashboardScreen = ({navigation}) => {
                 borderColor: colors.IMAGE_BORDER_COLOR,
                 marginRight: common.THREE
               }}>
-                <Avatar.Image size={50} source={require('../../../assets/user.png')} />
+                {/* <Avatar.Image size={50} source={require('../../../assets/user.png')} /> */}
+                <Avatar.Image 
+              size={50} source={{ uri:"https://my-cdn.com/assets/user/123.png" }} />
               </View>
               <Text style={{ textTransform: "uppercase" }}>{currentUser?.displayName}</Text>
             </View>
@@ -74,7 +89,7 @@ const DashboardScreen = ({navigation}) => {
           <View style={dashboardStyle.accounts}>
             <Text style={{ color: colors.LIGHT_TEXT_COLOR, textTransform: 'capitalize' }}>account balance</Text>
             <View style={dashboardStyle.balance}>
-              <Text style={{ fontSize: fontSize.L_40, fontWeight: 'bold' }}>900000.0</Text>
+              <Text style={{ fontSize: fontSize.L_40, fontWeight: 'bold' }}>{budgetData?.totalIncome}</Text>
             </View>
           </View>
           <View style={dashboardStyle.amountButtonSection}>
@@ -86,7 +101,7 @@ const DashboardScreen = ({navigation}) => {
               </View>
               <View>
                 <Text style={{ color: colors.WHITE }}>Income</Text>
-                <Text style={{ color: colors.WHITE, fontWeight: 'bold', fontSize: fontSize.XL }}>25000</Text>
+                <Text style={{ color: colors.WHITE, fontWeight: 'bold', fontSize: fontSize.XL }}>{budgetData?.totalIncome}</Text>
               </View>
             </View>
             <View style={[dashboardStyle.amount, { backgroundColor: colors.RED }]}>
@@ -102,19 +117,23 @@ const DashboardScreen = ({navigation}) => {
         </LinearGradient>
         <TouchableRipple rippleColor={colors.DASHBOARD_BAKCGROUND} onPress={() => {navigation.navigate('budgetForm')}} style={styles.budgetAlert}>
           <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-            <Ionicons
+            {!budgetData?<Ionicons
               name={(Platform.OS === 'android' ? 'md-alert-circle-outline' : 'ios-alert-circle-outline')}
-              size={30} color={colors.VOILET} />
-            <Text style={{ color: colors.VOILET }}>Your monthly budget missing!</Text>
-            <Text style={{
-              color: colors.VOILET,
-              borderBottomColor: colors.VOILET,
-              backgroundColor: colors.WARNING,
-              padding:common.FIVE,
-              borderRadius:common.FIVE,
-              fontSize:fontSize.SIXTEEN,
-              fontWeight:'bold',
-            }}>Press me to setup</Text>
+              size={30} color={colors.VOILET} />:
+              <Ionicons
+              name={(Platform.OS === 'android' ? 'md-checkmark-done-circle-outline' : 'ios-checkmark-done-circle-outline')}
+              size={30} color={colors.GREEN} />
+              }
+            {!budgetData? 
+            <><Text style={{ color: colors.VOILET }}>Your monthly budget missing!</Text><Text style={{
+                color: colors.VOILET,
+                borderBottomColor: colors.VOILET,
+                backgroundColor: colors.WARNING,
+                padding: common.FIVE,
+                borderRadius: common.FIVE,
+                fontSize: fontSize.SIXTEEN,
+                fontWeight: 'bold',
+              }}>Press me to setup</Text></>:<Text>Budget found</Text>}
           </View>
         </TouchableRipple>
         <View style={{ paddingHorizontal: 20, marginVertical: common.TWENTEE }}>

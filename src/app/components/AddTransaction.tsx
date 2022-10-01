@@ -46,10 +46,7 @@ const AddTransactionForm = (props: Props) => {
     const db = database();
     const baseUrl = `home-master/${authInfo.uid}`
 
-    const [itemsCategory, setItemsCategory] = useState([
-        { label: 'Bazar', value: 'bazar' },
-        { label: 'Medicine', value: 'medicine' }
-    ]);
+    const [itemsCategory, setItemsCategory] = useState([{}]);
     const [items, setItems] = useState([
         { label: 'Eggs', value: 'eggs' },
         { label: 'Fish', value: 'fish' }
@@ -109,6 +106,63 @@ const AddTransactionForm = (props: Props) => {
         }
     }
 
+    const addCategoris = () => {
+        db.ref(`${baseUrl}/bill/`)
+            .set([
+                { label: 'Gas bill', value: 'gas bill' },
+                { label: 'Current bill', value: 'current bill' },
+                { label: 'Internet', value: 'internet bill' },
+            ])
+            .then(() => {
+                notificationFn('total Successfully submitted');
+            });
+    }
+
+    // addCategoris();
+    const getCategoris = ()=>{
+        const onValueChange = database()
+            .ref(`${baseUrl}/categories`)
+            .on('value', snapshot => {
+                setItemsCategory(snapshot.val() || null);
+                // console.log("current data:", snapshot.val());
+            });
+
+        // Stop listening for updates when no longer required
+        return () => database().ref(`${baseUrl}/categories`).off('value', onValueChange);
+    }    
+    // addCategoris();
+    const getCategorisItems = ()=>{
+        let url = `${baseUrl}/categories`
+        if(valueCateroy === "bazar"){
+            url = `${baseUrl}/bazarItems`
+        }
+        if(valueCateroy === "medicine"){
+            url = `${baseUrl}/medicalItems`
+        }
+        if(valueCateroy === "house rent"){
+            url = `${baseUrl}/houseRent`
+        }
+        if(valueCateroy === "bill"){
+            url = `${baseUrl}/bill`
+        }
+        const onValueChange = database()
+            .ref(url)
+            .on('value', snapshot => {
+                setItems(snapshot.val() || null);
+                // console.log("items data", snapshot.val());
+            });
+
+        // Stop listening for updates when no longer required
+        return () => database().ref(`${baseUrl}/categories`).off('value', onValueChange);
+    }
+
+    useEffect(() => {
+        getCategoris();
+    }, []);
+
+    useEffect(() => {
+        getCategorisItems();
+    }, [valueCateroy]);
 
 
     useEffect(() => {
@@ -116,13 +170,8 @@ const AddTransactionForm = (props: Props) => {
             .ref(`${baseUrl}/expenses/${year}/${month}/${week}/${selectedDate.toString()}`)
             .on('value', snapshot => {
                 setCurrentDateData(snapshot.val() || null);
-                // console.log("current data:", snapshot.val());
+                console.log("current data:", snapshot.val());
             });
-        // .ref(`${baseUrl}/expenses/${year}`)
-        // .on('value', snapshot => {
-        //     setCurrentDateData(snapshot.val() || null);
-        //     console.log("current data:", snapshot.val());
-        // });
 
         // Stop listening for updates when no longer required
         return () => database().ref(`${baseUrl}/expenses/${selectedDate.toString()}`).off('value', onValueChange);
