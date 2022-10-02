@@ -1,5 +1,8 @@
 import database from '@react-native-firebase/database';
 import { Keyboard } from "react-native";
+import { baseUrl } from '../store/redux-storage/common/common.action';
+import { notificationFn } from './notification/notification';
+import { firebase } from '@react-native-firebase/auth';
 
 const db = database();
 export const emailValidator = (email: string) => {
@@ -32,7 +35,7 @@ export const weekNumber = (selectedDate: any) => {
   return weekOfMonth;
 };
 
-export const sumMonthFn = async (yearlyExpanses, month, week) => {
+export const sumMonthFn = async (yearlyExpanses, year, month, week) => {
   let data = await yearlyExpanses[month][week];
   // console.log("data: ",data);
   let sum = 0;
@@ -52,8 +55,23 @@ export const sumMonthFn = async (yearlyExpanses, month, week) => {
     db.ref(`${baseUrl}/expenses/${year}/${month}/${week}/`)
       .update({ weekTotal: sum })
       .then(() => {
-        notificationFn('weekTotal submitted');
+        notificationFn('weekTotal successfully created');
       });
     Keyboard.dismiss();
   }
 }
+
+export var weekTotal=0;
+
+export const weekSum =(year,month,week)=>{
+  let ref = firebase.database().ref(`${baseUrl}/expenses/${year}/${month}/${week}`);
+  let query = ref.orderByChild("total")
+  query.once("value", (snapshot)=>{
+    snapshot.forEach((child)=> {
+      console.log( "child value:",child.val().total);
+      weekTotal += Number(child.val().total);
+    });
+  });
+}
+
+

@@ -11,7 +11,9 @@ import common from '../constants/common/common';
 import fontSize from '../constants/common/font.size';
 import { TransectionDTO } from '../constants/transection/transectionDTO';
 import { notificationFn } from '../core/notification/notification';
-import { weekNumber } from '../core/utils';
+import { weekNumber, weekSum} from '../core/utils';
+import { firebase } from '@react-native-firebase/auth';
+import moment from 'moment';
 
 
 interface Props {
@@ -32,6 +34,8 @@ const AddTransactionForm = (props: Props) => {
     const [date, setDate] = useState(new Date());
     const [year, setYear] = useState(date.getFullYear());
     const [week, setWeek] = useState<number>(0);
+    const [weekTotal, setWeekTotal] = useState<number>(0);
+    const [monthTotal, setMonthTotal] = useState<number>(0);
     const [month, setMonth] = useState(date.getMonth());
     const [selectedDate, setSelectedDate] = useState("");
     const [show, setShow] = useState(false);
@@ -63,7 +67,6 @@ const AddTransactionForm = (props: Props) => {
             db.ref(`${baseUrl}/expenses/${year}/${month}/${week}/${selectedDate.toString()}`)
                 .set({ bazarCategory: valueCateroy, bazarItem: [{ item: valueItem, price: itemPrice, quantity: quantity }] })
                 .then(() => {
-                    sumFn();
                     notificationFn('Add Successfully submitted');
                 });
             return;
@@ -76,18 +79,16 @@ const AddTransactionForm = (props: Props) => {
                 .ref(`${baseUrl}/expenses/${year}/${month}/${week}/${selectedDate.toString()}`)
                 .update(data)
                 .then(() => {
-                    sumFn()
                     console.log('Data updated.')
                 });
-            setCurrentDateData({ bazarCategory: '', bazarItem: [{ item: '', price: '', quantity: '' }] })
+            // setCurrentDateData({ bazarCategory: '', bazarItem: [{ item: '', price: '', quantity: '' }] })
         } else {
             data?.bazarItem.push({ item: valueItem, price: itemPrice, quantity: quantity });
             await db.ref(`${baseUrl}/expenses/${year}/${month}/${week}/${selectedDate.toString()}`)
                 .set(data)
                 .then(() => {
-                    sumFn()
-                    notificationFn('push Successfully submitted');
-                    setCurrentDateData({ bazarCategory: '', bazarItem: [{ item: '', price: '', quantity: '' }] })
+                    notificationFn('Bazar items Successfully updated');
+                    // setCurrentDateData({ bazarCategory: '', bazarItem: [{ item: '', price: '', quantity: '' }] });
                 });
         }
     }
@@ -99,7 +100,7 @@ const AddTransactionForm = (props: Props) => {
         if (sum) {
             db.ref(`${baseUrl}/expenses/${year}/${month}/${week}/${selectedDate.toString()}/`)
                 .update({ total: sum })
-                .then(() => {
+                .then((res) => {
                     notificationFn('total Successfully submitted');
                 });
             Keyboard.dismiss()
@@ -170,7 +171,7 @@ const AddTransactionForm = (props: Props) => {
             .ref(`${baseUrl}/expenses/${year}/${month}/${week}/${selectedDate.toString()}`)
             .on('value', snapshot => {
                 setCurrentDateData(snapshot.val() || null);
-                console.log("current data:", snapshot.val());
+                // console.log("current data:", snapshot.val());
             });
 
         // Stop listening for updates when no longer required
@@ -188,11 +189,69 @@ const AddTransactionForm = (props: Props) => {
         return () => database().ref(`${baseUrl}/expenses/${selectedDate.toString()}`).off('value', onValueChange);
     }, [selectedDate]);
 
+    const weekSum =(year,month,week)=>{
+        let total=0;
+        let ref = firebase.database().ref(`${baseUrl}/expenses/${year}/${month}/${week}`);
+        let query = ref
+        query.once("value", (snapshot)=>{
+          snapshot.forEach((child)=> {
+            if(typeof(child.val())==="object"){
+                console.log(child.val().total);
+                total += Number(child.val().total);
+            }
+            
+          });
+          console.log("week total: ",total);
+          setWeekTotal(total);
+        });
+      }
+    const monthSum =(year,month)=>{
+        let total=0;
+        let ref = firebase.database().ref(`${baseUrl}/expenses/${year}/${month}`);
+        let query = ref
+        query.once("value", (snapshot)=>{
+          snapshot.forEach((child)=> {
+            if(typeof(child.val())==="object"){
+                console.log(child.val().weekTotal);
+                total += Number(child.val().weekTotal);
+            }
+          });
+          console.log("month total: ",total);
+          setMonthTotal(total);
+        });
+      }
+      
 
 
     useEffect(() => {
         sumFn();
+        weekSum(year,month,week);
+        monthSum(year,month);
     }, [currentDateData]);
+
+
+    useEffect(() => {
+        // console.log("week sum: ",weekSum(year,month,week))
+        if (weekTotal) {
+            db.ref(`${baseUrl}/expenses/${year}/${month}/${week}/`)
+                .update({ weekTotal: weekTotal })
+                .then((res) => {
+                    notificationFn('weekTotal Successfully updated');
+                });
+        }
+    }, [weekTotal]);
+
+    useEffect(() => {
+        // console.log("week sum: ",weekSum(year,month,week))
+        if (monthTotal) {
+            db.ref(`${baseUrl}/expenses/${year}/${month}/`)
+                .update({ monthTotal: monthTotal })
+                .then((res) => {
+                    notificationFn('Month Total Successfully updated');
+                });
+        }
+    }, [monthTotal]);
+    
 
     return (
         <View style={styles.transactionSectionWrapper}>
@@ -319,7 +378,9 @@ const AddTransactionForm = (props: Props) => {
                                 </>
                             })}
                         </View>
-                        <Text style={{ textAlign: 'right', right: 50, color: colors.RED, fontWeight: "bold" }}>Total: <Text>{currentDateData?.total}</Text></Text>
+                        <Text style={{ textAlign: 'right', right: 50, color: colors.RED, fontWeight: "bold" }}>Total: <Text>{currentDateData?.total}</Text> Tk</Text>
+                        <Text style={{ textAlign: 'right', right: 50, color: colors.RED, fontWeight: "bold" }}>Week Total({week}): <Text>{weekTotal}</Text> Tk</Text>
+                        <Text style={{ textAlign: 'right', right: 50, color: colors.RED, fontWeight: "bold" }}>Month Total({moment(date).format("MMMM")}): <Text>{weekTotal}</Text> Tk</Text>
                     </Modal>
                 </Portal>
             </Provider>

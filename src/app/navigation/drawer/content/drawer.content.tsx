@@ -50,7 +50,7 @@ export const DrawerLeftContent = (props) => {
                             marginRight: common.THREE,
                             marginHorizontal:common.TEN
                         }}>
-                            <Avatar.Image size={70} source={require('../../../../assets/user.png')} />
+                            <Avatar.Image size={70} source={{uri:currentUser?.photoURL}} />
                         </View>
                         <View style={{ flex: 1.5 }}>
                             <Text style={{ color: colors.LIGHT_TEXT_COLOR }}>username</Text>

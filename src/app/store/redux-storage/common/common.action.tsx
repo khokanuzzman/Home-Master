@@ -1,15 +1,20 @@
 import moment from "moment";
 import database from '@react-native-firebase/database';
 import { currentUser } from "../auth/auth.action";
+import { weekNumber } from "../../../core/utils";
 
 export const TRANSECTION_MODAL_STATUS = 'TRANSECTION_MODAL_STATUS';
 export const AMOUNT_CALCULATION_VALUE = 'AMOUNT_CALCULATION_VALUE';
-let currMonthName = moment().format('MMMM');
-let currentYear = moment().format('YYYY');
+export const currMonthName = moment().format('MMMM');
+export const currentYear = moment().format('YYYY');
+export const dayName = moment().format('dddd');
+export const year = moment().format('yyyy');
+export const month = moment().format('MM');
+export const currentMonthWeek = weekNumber(new Date());
 
 
 const db = database();
-const baseUrl = `home-master/${currentUser?.uid}`
+export const baseUrl = `home-master/${currentUser?.uid}`
 export const budgetUrl = `${baseUrl}/budget/${currentYear}/${currMonthName}/`
 
 export const transactionModalStatus = (status:boolean) => {

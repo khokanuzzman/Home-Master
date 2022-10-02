@@ -17,31 +17,30 @@ import dashboardStyle from './dashboard.style';
 import { firebase } from '@react-native-firebase/auth';
 import { currentUser } from '../../store/redux-storage/auth/auth.action';
 import styles from '../../constants/common/styles';
-import { budgetUrl } from '../../store/redux-storage/common/common.action';
+import { baseUrl, budgetUrl, currentMonthWeek, currMonthName, dayName, month, year } from '../../store/redux-storage/common/common.action';
 import { BudgetDTO } from '../../constants/budget/budgetDTO';
 
-const DashboardScreen = ({navigation}) => {
+const DashboardScreen = ({ navigation }) => {
   const reference = database().ref('/users/123');
   const [tabIndex, setTabIndex] = useState(0);
   // Set an initializing state whilst Firebase connects
   const [initializing, setInitializing] = useState(true);
   const [budgetData, setBudgetData] = useState<BudgetDTO>();
   const [user, setUser] = useState();
+  const [monthTotal, setMonthTotal] = useState(0);
+  const [weekTotal, setWeekTotal] = useState(0);
+  const [total, setTotal] = useState(0);
   const userRefCollection = collection(db, "users");
-
+  // console.log(year,month);
   // Handle user state changes
-  const onAuthStateChanged = (user) => {
-    setUser(user);
-    if (initializing) setInitializing(false);
-  }
 
   // currentUser?.updateProfile({
   //   displayName: "Khokan",
   //   photoURL: 'https://my-cdn.com/assets/user/123.png',
   // });
 
-  useEffect(() => {
-    console.log("url:",budgetUrl);
+  React.useEffect(() => {
+    // console.log("url:", budgetUrl);
     const onValueChange = database()
       .ref(budgetUrl)
       .on('value', snapshot => {
@@ -50,25 +49,33 @@ const DashboardScreen = ({navigation}) => {
 
     // Stop listening for updates when no longer required
     return () => database().ref(budgetUrl).off('value', onValueChange);
-  }, []);
-
+  }, []);  
+  
   React.useEffect(() => {
-    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-    return subscriber; // unsubscribe on unmount
+    const onValueChange = database()
+      .ref(`${baseUrl}/expenses/${year}/${month}/`)
+      .on('value', snapshot => {
+        console.log("bage url",snapshot.val().monthTotal)
+        setMonthTotal(snapshot.val().monthTotal)
+      });
+
+    // Stop listening for updates when no longer required
+    return () => database().ref(baseUrl).off('value', onValueChange);
   }, []);
 
+  // React.useEffect(() => {
+  //   const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+  //   return subscriber; // unsubscribe on unmount
+  // }, []);
 
-
-  if (initializing) return null;
-console.log("budget data: ",budgetData);
   return (
     <><ScrollView style={dashboardStyle.container}>
       <View style={{ flex: 1 }}>
         <LinearGradient style={[dashboardStyle.headersSection, dashboardStyle.shadow]} colors={['#FFF6E5', '#BAA9A5']} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }}>
           <TouchableOpacity onPress={() => navigation.openDrawer()} style={dashboardStyle.headersSectionTopBar}>
             <View>
-              <Text>Monday</Text>
-              <Text>November</Text>
+              <Text>{dayName}</Text>
+              <Text>{currMonthName}</Text>
             </View>
             <View style={dashboardStyle.headerSectionTopBarUser}>
               <View style={{
@@ -79,8 +86,8 @@ console.log("budget data: ",budgetData);
                 marginRight: common.THREE
               }}>
                 {/* <Avatar.Image size={50} source={require('../../../assets/user.png')} /> */}
-                <Avatar.Image 
-              size={50} source={{ uri:"https://my-cdn.com/assets/user/123.png" }} />
+                <Avatar.Image
+                  size={50} source={{ uri: "https://my-cdn.com/assets/user/123.png" }} />
               </View>
               <Text style={{ textTransform: "uppercase" }}>{currentUser?.displayName}</Text>
             </View>
@@ -100,7 +107,7 @@ console.log("budget data: ",budgetData);
                   size={30} color={colors.GREEN} />
               </View>
               <View>
-                <Text style={{ color: colors.WHITE }}>Income</Text>
+                <Text style={{ color: colors.WHITE }}>Monthly Budget</Text>
                 <Text style={{ color: colors.WHITE, fontWeight: 'bold', fontSize: fontSize.XL }}>{budgetData?.totalIncome}</Text>
               </View>
             </View>
@@ -109,23 +116,23 @@ console.log("budget data: ",budgetData);
                 name={(Platform.OS === 'android' ? 'md-remove-sharp' : 'ios-remove-circle-sharp')}
                 size={30} color={colors.GREEN} /></View>
               <View>
-                <Text style={{ color: colors.WHITE }}>Expanses</Text>
+                <Text style={{ color: colors.WHITE }}>Monthly Expanses</Text>
                 <Text style={{ color: colors.WHITE, fontWeight: 'bold', fontSize: fontSize.XL }}>25000</Text>
               </View>
             </View>
           </View>
         </LinearGradient>
-        <TouchableRipple rippleColor={colors.DASHBOARD_BAKCGROUND} onPress={() => {navigation.navigate('budgetForm')}} style={styles.budgetAlert}>
+        <TouchableRipple rippleColor={colors.DASHBOARD_BAKCGROUND} onPress={() => { navigation.navigate('budgetForm') }} style={styles.budgetAlert}>
           <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-            {!budgetData?<Ionicons
+            {!budgetData ? <Ionicons
               name={(Platform.OS === 'android' ? 'md-alert-circle-outline' : 'ios-alert-circle-outline')}
-              size={30} color={colors.VOILET} />:
+              size={30} color={colors.VOILET} /> :
               <Ionicons
-              name={(Platform.OS === 'android' ? 'md-checkmark-done-circle-outline' : 'ios-checkmark-done-circle-outline')}
-              size={30} color={colors.GREEN} />
-              }
-            {!budgetData? 
-            <><Text style={{ color: colors.VOILET }}>Your monthly budget missing!</Text><Text style={{
+                name={(Platform.OS === 'android' ? 'md-checkmark-done-circle-outline' : 'ios-checkmark-done-circle-outline')}
+                size={30} color={colors.GREEN} />
+            }
+            {!budgetData ?
+              <><Text style={{ color: colors.VOILET }}>Your monthly budget missing!</Text><Text style={{
                 color: colors.VOILET,
                 borderBottomColor: colors.VOILET,
                 backgroundColor: colors.WARNING,
@@ -133,7 +140,19 @@ console.log("budget data: ",budgetData);
                 borderRadius: common.FIVE,
                 fontSize: fontSize.SIXTEEN,
                 fontWeight: 'bold',
-              }}>Press me to setup</Text></>:<Text>Budget found</Text>}
+              }}>Press me to setup</Text></> :
+              <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                <Text>Budget found</Text>
+                <TouchableRipple style={{
+                  borderWidth: 1,
+                  padding: common.TEN,
+                  borderRadius: common.TEN,
+                  backgroundColor: colors.DASHBOARD_BAKCGROUND,
+                  marginTop:common.FIVE,
+                }} rippleColor={colors.VOILET}>
+                  <Text style={{color:colors.WHITE}}>Update your budget</Text>
+                </TouchableRipple>
+              </View>}
           </View>
         </TouchableRipple>
         <View style={{ paddingHorizontal: 20, marginVertical: common.TWENTEE }}>
