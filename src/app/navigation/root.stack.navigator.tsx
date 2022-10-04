@@ -45,7 +45,7 @@ export const RootStackNavigator = ({ navigation }) => {
                         <Appbar.Header
                             style={{ backgroundColor: colors.BAKCGROUND, elevation: 0 }}>
                             {progress.previous
-                                ? (<Appbar.BackAction onPress={navigation.goBack} color={colors.GREEN} />) : (
+                                ? (<Appbar.BackAction onPress={navigation.goBack} color={colors.VOILET} />) : (
                                     <Appbar.Action icon='menu' color={colors.TOP_BAR_TEXT_COLOR} size={common.ICON_SIZE} onPress={() => {
                                         ((navigation as any) as DrawerNavigationProp<{}>).openDrawer();
                                     }} />

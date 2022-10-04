@@ -9,7 +9,7 @@ import colors from '../../../constants/common/colors';
 import common from '../../../constants/common/common';
 import { logoutFn } from '../../../constants/common/common_function';
 import fontSize from '../../../constants/common/font.size';
-import { currentUser } from '../../../store/redux-storage/auth/auth.action';
+import { currentUser } from '../../app.navigation.container';
 import drawerStyle from './drawer.content.style';
 
 

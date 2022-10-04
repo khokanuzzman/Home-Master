@@ -35,6 +35,10 @@ export const weekNumber = (selectedDate: any) => {
   return weekOfMonth;
 };
 
+export const percentages = (partialValue: number, totalValue: number) => {
+  return Math.round((100 * partialValue) / totalValue) || 0;
+}
+
 export const sumMonthFn = async (yearlyExpanses, year, month, week) => {
   let data = await yearlyExpanses[month][week];
   // console.log("data: ",data);

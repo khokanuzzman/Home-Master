@@ -6,11 +6,13 @@ import React, { useEffect, useState } from 'react';
 import { configureFonts, DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 import { useDispatch } from 'react-redux';
 import * as authAction from '../../app/store/redux-storage/auth/auth.action';
+import LoaderComponent from '../components/loader.component';
 import colors from '../constants/common/colors';
 import { authInfo, getLoggedStatus } from '../constants/common/common_function';
 import { ForgotPasswordScreen, HomeScreen, LoginScreen, RegisterScreen } from '../screens';
+import DashboardScreen from '../screens/dashboard/dashboard.screen';
 import LeftDrawer from './drawer/left.drawer';
-
+export const currentUser = auth().currentUser;
 
 
 const theme = {
@@ -32,18 +34,14 @@ const DrawerTest = createDrawerNavigator();
 const AppNavigationContainer = () => {
     const [loggedIn, setIsLoggedIn] = useState(false);
     const dispatch = useDispatch();
+    const [isLoading, setIsLoading] = useState(false);
     // if (initializing) return null;
     const user = authInfo();
     const fuser = auth().currentUser;
 
-    useEffect(() => {
-        dispatch(authAction.authInfo(fuser));
-    })
-
-    useEffect(() => {
-        getLoggedStatus().then(res => { setIsLoggedIn(Boolean(res)) });
-    }, [])
-
+    if(isLoading){
+        return(<LoaderComponent/>)
+    }
     return (
         <PaperProvider theme={theme}>
             <NavigationContainer>
@@ -52,9 +50,9 @@ const AppNavigationContainer = () => {
                         <Stack.Screen name='login' component={LoginScreen} options={{
                             headerShown: false,
                         }} />
-                        {/* <Stack.Screen name='dashboard' component={DashboardScreen} options={{
+                        <Stack.Screen name='dashboard' component={DashboardScreen} options={{
                             headerShown: false,
-                        }} /> */}
+                        }} />
                         <Stack.Screen name='register' component={RegisterScreen} options={{
                             headerShown: false,
                         }} />

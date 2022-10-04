@@ -1,30 +1,30 @@
 
 import {
     AMOUNT_CALCULATION_VALUE,
-    TRANSECTION_MODAL_STATUS
+    TRANSECTION_MODAL_STATUS,
+    WEEK_TOTAL_EXPANSES
 } from './common.action';
 
 const status: boolean = false;
-const amountNumber: number = 0;
+const weekTotal: number = 0;
 
 const initialState = {
     transectionStatus: status,
-    amount: amountNumber
+    weekTotal: weekTotal
     // doctorSearchQuery:doctorSearchQuery
 }
 
 export default (state = initialState, action) => {
-    console.log()
     switch (action.type) {
         case TRANSECTION_MODAL_STATUS:
             return {
                 ...state,
                 transectionStatus: action.status
             };        
-            case AMOUNT_CALCULATION_VALUE:
+            case WEEK_TOTAL_EXPANSES:
             return {
                 ...state,
-                amount: action.amount
+                weekTotal: action.weekTotal
             };
 
         default:

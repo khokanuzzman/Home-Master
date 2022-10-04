@@ -26,6 +26,3 @@ const analytics = getAnalytics(app);
 export const db = initializeFirestore(app, {
     experimentalForceLongPolling: true,
 });
-
-export const baseUrl = `home-master/${authInfo.uid}`
-console.log("from firebase config:", baseUrl);

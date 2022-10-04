@@ -8,7 +8,6 @@ const ProfileScreen = (props: any) => {
     const { email } = props?.route?.params ? props?.route?.params : [];
     const [userInfo, setUserInfo] = useState(null);
     const authInfo: AuthInfo = useSelector((state) => state.auth.authInfo);
-    console.log(authInfo.email);
     return (
         <View>
             <Text>{authInfo?.email}</Text>

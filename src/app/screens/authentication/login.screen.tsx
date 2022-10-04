@@ -6,16 +6,19 @@ import { useDispatch } from 'react-redux';
 import * as authAction from '../../../app/store/redux-storage/auth/auth.action';
 import Background from '../../components/Background';
 import Button from '../../components/Button';
+import LoaderComponent from '../../components/loader.component';
 import Logo from '../../components/Logo';
 import TextInput from '../../components/TextInput';
+import colors from '../../constants/common/colors';
 import { notificationFn } from '../../core/notification/notification';
 import { theme } from '../../core/theme';
 import { emailValidator, passwordValidator } from '../../core/utils';
 
-const LoginScreen = (props: any) => {
+const LoginScreen = ({navigation}) => {
     const dispatch = useDispatch();
     const [email, setEmail] = useState({ value: '', error: '' });
     const [password, setPassword] = useState({ value: '', error: '' });
+    const [isLoading, setIsLoading] = useState(false);
 
     const _onLoginPressed = () => {
         const emailError = emailValidator(email.value);
@@ -32,11 +35,14 @@ const LoginScreen = (props: any) => {
     };
 
     const signInpWithEmailPass = (email: string, password: string) => {
+        setIsLoading(true);
         auth()
             .signInWithEmailAndPassword(email, password)
             .then((res) => {
-                props.navigation.replace('dashboard');
-                dispatch(authAction.authInfo(res));
+                navigation.navigate('dashboard');
+                dispatch(authAction.authInfo(res)).then(()=>{
+                    setIsLoading(false);
+                });
             })
             .catch(error => {
                 if (error.code === 'auth/wrong-password') {
@@ -46,11 +52,13 @@ const LoginScreen = (props: any) => {
                 if (error.code === 'auth/invalid-email') {
                     console.log('That email address is invalid!');
                 }
-
                 console.error(error);
+                setIsLoading(false);
             });
     }
-
+    if (isLoading) {
+        return <LoaderComponent />;
+    }
 
     return (
         <Background>
@@ -58,7 +66,7 @@ const LoginScreen = (props: any) => {
 
             <Logo />
 
-            <Header>Welcome back.</Header>
+            {/* <Header>Welcome back.</Header> */}
 
             <TextInput
                 label="Email"
@@ -91,13 +99,13 @@ const LoginScreen = (props: any) => {
                 </TouchableOpacity>
             </View>
 
-            <Button mode="contained" onPress={_onLoginPressed}>
+            <Button color={colors.VOILET} mode="contained" onPress={_onLoginPressed}>
                 Login
             </Button>
 
             <View style={styles.row}>
                 <Text style={styles.label}>Don’t have an account? </Text>
-                <TouchableOpacity onPress={() => props.navigation.navigate('register')}>
+                <TouchableOpacity onPress={() => navigation.navigate('register')}>
                     <Text style={styles.link}>Sign up</Text>
                 </TouchableOpacity>
             </View>

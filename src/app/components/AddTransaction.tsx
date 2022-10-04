@@ -3,7 +3,7 @@ import database from '@react-native-firebase/database';
 import React, { useEffect, useState } from 'react';
 import { Button, Keyboard, Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
-import { IconButton, Modal, Portal, Provider, TextInput } from 'react-native-paper';
+import { IconButton, Modal, Portal, Provider, TextInput, TouchableRipple } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
 import { AuthInfo } from '../constants/auth/authDto';
 import colors from '../constants/common/colors';
@@ -11,7 +11,7 @@ import common from '../constants/common/common';
 import fontSize from '../constants/common/font.size';
 import { TransectionDTO } from '../constants/transection/transectionDTO';
 import { notificationFn } from '../core/notification/notification';
-import { weekNumber, weekSum} from '../core/utils';
+import { weekNumber, weekSum } from '../core/utils';
 import { firebase } from '@react-native-firebase/auth';
 import moment from 'moment';
 
@@ -36,6 +36,7 @@ const AddTransactionForm = (props: Props) => {
     const [week, setWeek] = useState<number>(0);
     const [weekTotal, setWeekTotal] = useState<number>(0);
     const [monthTotal, setMonthTotal] = useState<number>(0);
+    const [yearTotal, setYearTotal] = useState<number>(0);
     const [month, setMonth] = useState(date.getMonth());
     const [selectedDate, setSelectedDate] = useState("");
     const [show, setShow] = useState(false);
@@ -48,13 +49,11 @@ const AddTransactionForm = (props: Props) => {
     const [visible, setVisible] = React.useState(false);
 
     const db = database();
-    const baseUrl = `home-master/${authInfo.uid}`
+    const baseUrlUid = `home-master/${authInfo?.uid}`
+    const baseUrl = `home-master`
 
     const [itemsCategory, setItemsCategory] = useState([{}]);
-    const [items, setItems] = useState([
-        { label: 'Eggs', value: 'eggs' },
-        { label: 'Fish', value: 'fish' }
-    ]);
+    const [items, setItems] = useState([{}]);
     // console.log(month, week, year);
 
     const showModal = () => setVisible(true);
@@ -64,7 +63,7 @@ const AddTransactionForm = (props: Props) => {
         let data: TransectionDTO = currentDateData;
         let index = data?.bazarItem.findIndex(x => x.item === valueItem);
         if (!data) {
-            db.ref(`${baseUrl}/expenses/${year}/${month}/${week}/${selectedDate.toString()}`)
+            db.ref(`${baseUrlUid}/expenses/${year}/${month}/${week}/${selectedDate.toString()}`)
                 .set({ bazarCategory: valueCateroy, bazarItem: [{ item: valueItem, price: itemPrice, quantity: quantity }] })
                 .then(() => {
                     notificationFn('Add Successfully submitted');
@@ -76,7 +75,7 @@ const AddTransactionForm = (props: Props) => {
             data.bazarItem[index].price = itemPrice.toString();
             data.bazarItem[index].quantity = quantity;
             await db
-                .ref(`${baseUrl}/expenses/${year}/${month}/${week}/${selectedDate.toString()}`)
+                .ref(`${baseUrlUid}/expenses/${year}/${month}/${week}/${selectedDate.toString()}`)
                 .update(data)
                 .then(() => {
                     console.log('Data updated.')
@@ -84,7 +83,7 @@ const AddTransactionForm = (props: Props) => {
             // setCurrentDateData({ bazarCategory: '', bazarItem: [{ item: '', price: '', quantity: '' }] })
         } else {
             data?.bazarItem.push({ item: valueItem, price: itemPrice, quantity: quantity });
-            await db.ref(`${baseUrl}/expenses/${year}/${month}/${week}/${selectedDate.toString()}`)
+            await db.ref(`${baseUrlUid}/expenses/${year}/${month}/${week}/${selectedDate.toString()}`)
                 .set(data)
                 .then(() => {
                     notificationFn('Bazar items Successfully updated');
@@ -98,7 +97,7 @@ const AddTransactionForm = (props: Props) => {
             return accumulator + parseInt(item?.price);
         }, 0);
         if (sum) {
-            db.ref(`${baseUrl}/expenses/${year}/${month}/${week}/${selectedDate.toString()}/`)
+            db.ref(`${baseUrlUid}/expenses/${year}/${month}/${week}/${selectedDate.toString()}/`)
                 .update({ total: sum })
                 .then((res) => {
                     notificationFn('total Successfully submitted');
@@ -108,11 +107,13 @@ const AddTransactionForm = (props: Props) => {
     }
 
     const addCategoris = () => {
-        db.ref(`${baseUrl}/bill/`)
+        db.ref(`${baseUrl}/medicalItems/`)
             .set([
-                { label: 'Gas bill', value: 'gas bill' },
-                { label: 'Current bill', value: 'current bill' },
-                { label: 'Internet', value: 'internet bill' },
+                { label: 'Indever 10', value: 'indever 10' },
+                { label: 'Orbapin 5/20', value: 'orbapin 5/20' },
+                { label: 'DDR30', value: 'ddr30' },
+                { label: 'Napa 500', value: 'napa 500' },
+                { label: 'Napa 1000', value: 'napa 1000' },
             ])
             .then(() => {
                 notificationFn('total Successfully submitted');
@@ -120,7 +121,7 @@ const AddTransactionForm = (props: Props) => {
     }
 
     // addCategoris();
-    const getCategoris = ()=>{
+    const getCategoris = () => {
         const onValueChange = database()
             .ref(`${baseUrl}/categories`)
             .on('value', snapshot => {
@@ -130,20 +131,20 @@ const AddTransactionForm = (props: Props) => {
 
         // Stop listening for updates when no longer required
         return () => database().ref(`${baseUrl}/categories`).off('value', onValueChange);
-    }    
+    }
     // addCategoris();
-    const getCategorisItems = ()=>{
+    const getCategorisItems = () => {
         let url = `${baseUrl}/categories`
-        if(valueCateroy === "bazar"){
+        if (valueCateroy === "bazar") {
             url = `${baseUrl}/bazarItems`
         }
-        if(valueCateroy === "medicine"){
+        if (valueCateroy === "medical") {
             url = `${baseUrl}/medicalItems`
         }
-        if(valueCateroy === "house rent"){
+        if (valueCateroy === "house rent") {
             url = `${baseUrl}/houseRent`
         }
-        if(valueCateroy === "bill"){
+        if (valueCateroy === "bill") {
             url = `${baseUrl}/bill`
         }
         const onValueChange = database()
@@ -168,72 +169,78 @@ const AddTransactionForm = (props: Props) => {
 
     useEffect(() => {
         const onValueChange = database()
-            .ref(`${baseUrl}/expenses/${year}/${month}/${week}/${selectedDate.toString()}`)
+            .ref(`${baseUrlUid}/expenses/${year}/${month}/${week}/${selectedDate.toString()}`)
             .on('value', snapshot => {
                 setCurrentDateData(snapshot.val() || null);
                 // console.log("current data:", snapshot.val());
             });
 
         // Stop listening for updates when no longer required
-        return () => database().ref(`${baseUrl}/expenses/${selectedDate.toString()}`).off('value', onValueChange);
+        return () => database().ref(`${baseUrlUid}/expenses/${selectedDate.toString()}`).off('value', onValueChange);
     }, [selectedDate]);
 
     useEffect(() => {
         const onValueChange = database()
-            .ref(`${baseUrl}/expenses/${year}`)
+            .ref(`${baseUrlUid}/expenses/${year}`)
             .on('value', snapshot => {
                 setYearlyExpanses(snapshot.val() || null);
                 // console.log("yearly expanses:", snapshot.val());
             });
         // Stop listening for updates when no longer required
-        return () => database().ref(`${baseUrl}/expenses/${selectedDate.toString()}`).off('value', onValueChange);
+        return () => database().ref(`${baseUrlUid}/expenses/${selectedDate.toString()}`).off('value', onValueChange);
     }, [selectedDate]);
 
-    const weekSum =(year,month,week)=>{
-        let total=0;
-        let ref = firebase.database().ref(`${baseUrl}/expenses/${year}/${month}/${week}`);
-        let query = ref
-        query.once("value", (snapshot)=>{
-          snapshot.forEach((child)=> {
-            if(typeof(child.val())==="object"){
-                console.log(child.val().total);
-                total += Number(child.val().total);
-            }
-            
-          });
-          console.log("week total: ",total);
-          setWeekTotal(total);
+    const weekSum = (year, month, week) => {
+        let total = 0;
+        let ref = firebase.database().ref(`${baseUrlUid}/expenses/${year}/${month}/${week}`);
+        ref.once("value", (snapshot) => {
+            snapshot.forEach((child) => {
+                if (typeof (child.val()) === "object") {
+                    total += Number(child.val().total);
+                }
+            });
+            setWeekTotal(total);
         });
-      }
-    const monthSum =(year,month)=>{
-        let total=0;
-        let ref = firebase.database().ref(`${baseUrl}/expenses/${year}/${month}`);
+    }
+    const monthSum = (year, month) => {
+        let total = 0;
+        let ref = firebase.database().ref(`${baseUrlUid}/expenses/${year}/${month}`);
         let query = ref
-        query.once("value", (snapshot)=>{
-          snapshot.forEach((child)=> {
-            if(typeof(child.val())==="object"){
-                console.log(child.val().weekTotal);
-                total += Number(child.val().weekTotal);
-            }
-          });
-          console.log("month total: ",total);
-          setMonthTotal(total);
+        query.once("value", (snapshot) => {
+            snapshot.forEach((child) => {
+                if (typeof (child.val()) === "object") {
+                    total += Number(child.val().weekTotal);
+                }
+            });
+            setMonthTotal(total);
         });
-      }
-      
+    }
+
+    const yearSum = (year) => {
+        let total = 0;
+        let ref = firebase.database().ref(`${baseUrlUid}/expenses/${year}`);
+        let query = ref
+        query.once("value", (snapshot) => {
+            snapshot.forEach((child) => {
+                if (typeof (child.val()) === "object") {
+                    total += Number(child.val().monthTotal);
+                }
+            });
+            setYearTotal(total);
+        });
+    }
+
 
 
     useEffect(() => {
         sumFn();
-        weekSum(year,month,week);
-        monthSum(year,month);
     }, [currentDateData]);
 
 
     useEffect(() => {
         // console.log("week sum: ",weekSum(year,month,week))
         if (weekTotal) {
-            db.ref(`${baseUrl}/expenses/${year}/${month}/${week}/`)
+            db.ref(`${baseUrlUid}/expenses/${year}/${month}/${week}/`)
                 .update({ weekTotal: weekTotal })
                 .then((res) => {
                     notificationFn('weekTotal Successfully updated');
@@ -244,14 +251,25 @@ const AddTransactionForm = (props: Props) => {
     useEffect(() => {
         // console.log("week sum: ",weekSum(year,month,week))
         if (monthTotal) {
-            db.ref(`${baseUrl}/expenses/${year}/${month}/`)
+            db.ref(`${baseUrlUid}/expenses/${year}/${month}/`)
                 .update({ monthTotal: monthTotal })
                 .then((res) => {
                     notificationFn('Month Total Successfully updated');
                 });
         }
     }, [monthTotal]);
-    
+
+    useEffect(() => {
+        // console.log("week sum: ",weekSum(year,month,week))
+        if (monthTotal) {
+            db.ref(`${baseUrlUid}/expenses/${year}/`)
+                .update({ yearTotal: yearTotal })
+                .then((res) => {
+                    notificationFn('Year Total Successfully updated');
+                });
+        }
+    }, [yearTotal]);
+
 
     return (
         <View style={styles.transactionSectionWrapper}>
@@ -296,6 +314,10 @@ const AddTransactionForm = (props: Props) => {
                         setOpen={setItem}
                         setValue={setValueItem}
                         setItems={setItems}
+                        disabled={!valueCateroy}
+                        searchable={true}
+                        disabledStyle={{ backgroundColor: colors.ASH, borderColor: colors.ASH }}
+                        zIndex={99999}
                     />
                 </View>
                 <View style={styles.marginVertical10}>
@@ -379,8 +401,21 @@ const AddTransactionForm = (props: Props) => {
                             })}
                         </View>
                         <Text style={{ textAlign: 'right', right: 50, color: colors.RED, fontWeight: "bold" }}>Total: <Text>{currentDateData?.total}</Text> Tk</Text>
-                        <Text style={{ textAlign: 'right', right: 50, color: colors.RED, fontWeight: "bold" }}>Week Total({week}): <Text>{weekTotal}</Text> Tk</Text>
-                        <Text style={{ textAlign: 'right', right: 50, color: colors.RED, fontWeight: "bold" }}>Month Total({moment(date).format("MMMM")}): <Text>{weekTotal}</Text> Tk</Text>
+                        {weekTotal ? <Text style={{ textAlign: 'right', right: 50, color: colors.RED, fontWeight: "bold" }}>Week Total({week}): <Text>{weekTotal}</Text> Tk</Text> : null}
+                        {monthTotal ? <Text style={{ textAlign: 'right', right: 50, color: colors.RED, fontWeight: "bold" }}>Month Total({moment(date).format("MMMM")}): <Text>{monthTotal}</Text> Tk</Text> : null}
+                        {yearTotal ? <Text style={{ textAlign: 'right', right: 50, color: colors.RED, fontWeight: "bold" }}>Year Total({moment(date).format("YYYY")}): <Text>{yearTotal}</Text> Tk</Text> : null}
+                        <View style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-evenly',
+                            alignItems: 'center',
+                            flexWrap: 'wrap',
+                            padding: common.TWENTEE
+                        }}>
+                            {/* <Text style={{ textAlign: 'right', right: 50, color: colors.RED, fontWeight: "bold" }}>Year Total({moment(date).format("YYYY")}): <Text>{yearTotal}</Text> Tk</Text> */}
+                            {!yearTotal ? <TouchableRipple style={styles.expansesBtn} rippleColor={colors.VOILET} onPress={() => { yearSum(year) }}><Text style={styles.expansesText}>Year expanses</Text></TouchableRipple> : null}
+                            {!monthTotal ? <TouchableRipple style={styles.expansesBtn} rippleColor={colors.VOILET} onPress={() => { monthSum(year, month) }}><Text style={styles.expansesText}>Month expanses</Text></TouchableRipple> : null}
+                            {!weekTotal ? <TouchableRipple style={styles.expansesBtn} rippleColor={colors.VOILET} onPress={() => { weekSum(year, month, week) }}><Text style={styles.expansesText}>Week expanses</Text></TouchableRipple> : null}
+                        </View>
                     </Modal>
                 </Portal>
             </Provider>
@@ -465,6 +500,16 @@ const styles = StyleSheet.create({
         flex: 1,
         textAlign: 'center',
         fontWeight: '700'
+    },
+    expansesBtn: {
+        padding: common.TEN,
+        backgroundColor: colors.VOILET,
+        borderRadius: common.TEN,
+        margin: common.FIVE
+    },
+    expansesText: {
+        color: colors.WHITE,
+        textTransform: 'capitalize'
     }
 });
 

@@ -1,8 +1,8 @@
+import React,{ useEffect, useState } from 'react';
 import auth from '@react-native-firebase/auth';
 import database from '@react-native-firebase/database';
 import { collection } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react';
-import { Button, Platform, View } from 'react-native';
+import { Button, LayoutAnimation, Platform, UIManager, View } from 'react-native';
 import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
 import LinearGradient from 'react-native-linear-gradient';
 import { Avatar, Divider, Text, TouchableRipple } from 'react-native-paper';
@@ -15,10 +15,12 @@ import common from '../../constants/common/common';
 import fontSize from '../../constants/common/font.size';
 import dashboardStyle from './dashboard.style';
 import { firebase } from '@react-native-firebase/auth';
-import { currentUser } from '../../store/redux-storage/auth/auth.action';
 import styles from '../../constants/common/styles';
-import { baseUrl, budgetUrl, currentMonthWeek, currMonthName, dayName, month, year } from '../../store/redux-storage/common/common.action';
+import { budgetUrl, currentMonthWeek, currMonthName, currentDate, dayName, month, year } from '../../store/redux-storage/common/common.action';
 import { BudgetDTO } from '../../constants/budget/budgetDTO';
+import { percentages } from '../../core/utils';
+import { currentUser } from '../../navigation/app.navigation.container';
+import Animated, { Layout,FadeOutDown, FadeInUp, Easing, FlipInXUp, FlipOutXDown, FadeIn, FadeOut, ZoomOut, ZoomIn, ZoomOutRotate, ZoomInRotate } from 'react-native-reanimated';
 
 const DashboardScreen = ({ navigation }) => {
   const reference = database().ref('/users/123');
@@ -29,8 +31,26 @@ const DashboardScreen = ({ navigation }) => {
   const [user, setUser] = useState();
   const [monthTotal, setMonthTotal] = useState(0);
   const [weekTotal, setWeekTotal] = useState(0);
-  const [total, setTotal] = useState(0);
-  const userRefCollection = collection(db, "users");
+  const [yearTotal, setYearTotal] = useState(0);
+  const [total, setTotal] = useState();
+  const db = database();
+  const baseUrlUid = `home-master/${currentUser?.uid}`
+// Enable LayoutAnimation under Android
+const [boxPosition, setBoxPosition] = useState("left");
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+  LayoutAnimation.configureNext({
+    duration: 500,
+    create: { type: "linear", property: "opacity" },
+    update: { type: "spring", springDamping: 0.4 },
+    delete: { type: "linear", property: "opacity" }
+  });
+// toggleBox();
   // console.log(year,month);
   // Handle user state changes
 
@@ -39,34 +59,30 @@ const DashboardScreen = ({ navigation }) => {
   //   photoURL: 'https://my-cdn.com/assets/user/123.png',
   // });
 
-  React.useEffect(() => {
-    // console.log("url:", budgetUrl);
-    const onValueChange = database()
+  useEffect(() => {
+    const onValueChange = db
       .ref(budgetUrl)
       .on('value', snapshot => {
-        setBudgetData(snapshot.val());
+        setBudgetData(snapshot?.val());
       });
 
     // Stop listening for updates when no longer required
     return () => database().ref(budgetUrl).off('value', onValueChange);
-  }, []);  
-  
-  React.useEffect(() => {
-    const onValueChange = database()
-      .ref(`${baseUrl}/expenses/${year}/${month}/`)
+  }, [currentUser?.uid.length]);
+
+  useEffect(() => {
+    const onValueChange = db
+      .ref(`${baseUrlUid}/expenses/${year}/`)
       .on('value', snapshot => {
-        console.log("bage url",snapshot.val().monthTotal)
-        setMonthTotal(snapshot.val().monthTotal)
+        setYearTotal(snapshot.val()?.yearTotal || 0);
+        setMonthTotal(snapshot.val()?.[month]?.["monthTotal"] || 0);
+        setWeekTotal(snapshot.val()?.[month]?.[currentMonthWeek]?.["weekTotal"] || 0);
+        setTotal(snapshot.val()?.[month]?.[currentMonthWeek]?.[currentDate]?.["total"] || 0);
       });
 
     // Stop listening for updates when no longer required
-    return () => database().ref(baseUrl).off('value', onValueChange);
-  }, []);
-
-  // React.useEffect(() => {
-  //   const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-  //   return subscriber; // unsubscribe on unmount
-  // }, []);
+    return () => db.ref(baseUrlUid).off('value', onValueChange);
+  }, [currentDate]);
 
   return (
     <><ScrollView style={dashboardStyle.container}>
@@ -94,32 +110,32 @@ const DashboardScreen = ({ navigation }) => {
           </TouchableOpacity>
           <Divider style={{ marginTop: common.TEN }} />
           <View style={dashboardStyle.accounts}>
-            <Text style={{ color: colors.LIGHT_TEXT_COLOR, textTransform: 'capitalize' }}>account balance</Text>
+            <Text style={{ color: colors.LIGHT_TEXT_COLOR, textTransform: 'capitalize' }}>account balance of {currMonthName}</Text>
             <View style={dashboardStyle.balance}>
-              <Text style={{ fontSize: fontSize.L_40, fontWeight: 'bold' }}>{budgetData?.totalIncome}</Text>
+              <Text style={{ fontSize: fontSize.L_40, fontWeight: 'bold' }}>{Number(budgetData?.totalIncome) - monthTotal || 0}</Text>
             </View>
           </View>
           <View style={dashboardStyle.amountButtonSection}>
-            <View style={dashboardStyle.amount}>
-              <View style={dashboardStyle.amountIconWrapper}>
-                <Ionicons
-                  name={(Platform.OS === 'android' ? 'md-add-sharp' : 'ios-add-circle-sharp')}
-                  size={30} color={colors.GREEN} />
-              </View>
-              <View>
+            <Animated.View
+            key={budgetData?.totalIncome}
+            entering={ZoomInRotate.duration(200)}
+            // exiting={ZoomIn}
+            style={dashboardStyle.amount}>
+              <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                 <Text style={{ color: colors.WHITE }}>Monthly Budget</Text>
-                <Text style={{ color: colors.WHITE, fontWeight: 'bold', fontSize: fontSize.XL }}>{budgetData?.totalIncome}</Text>
+                <Text style={{ color: colors.WHITE, fontWeight: 'bold', fontSize: fontSize.XL }}>{budgetData?.totalIncome || 0}</Text>
               </View>
-            </View>
-            <View style={[dashboardStyle.amount, { backgroundColor: colors.RED }]}>
-              <View style={dashboardStyle.amountIconWrapper}><Ionicons
-                name={(Platform.OS === 'android' ? 'md-remove-sharp' : 'ios-remove-circle-sharp')}
-                size={30} color={colors.GREEN} /></View>
-              <View>
+            </Animated.View>
+            <Animated.View 
+            key={monthTotal}
+            entering={ZoomInRotate.duration(200)}
+            // exiting={ZoomIn}
+            style={[dashboardStyle.amount, { backgroundColor: colors.RED }]}>
+              <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                 <Text style={{ color: colors.WHITE }}>Monthly Expanses</Text>
-                <Text style={{ color: colors.WHITE, fontWeight: 'bold', fontSize: fontSize.XL }}>25000</Text>
+                <Text style={{ color: colors.WHITE, fontWeight: 'bold', fontSize: fontSize.XL }}>{monthTotal}</Text>
               </View>
-            </View>
+            </Animated.View>
           </View>
         </LinearGradient>
         <TouchableRipple rippleColor={colors.DASHBOARD_BAKCGROUND} onPress={() => { navigation.navigate('budgetForm') }} style={styles.budgetAlert}>
@@ -148,9 +164,9 @@ const DashboardScreen = ({ navigation }) => {
                   padding: common.TEN,
                   borderRadius: common.TEN,
                   backgroundColor: colors.DASHBOARD_BAKCGROUND,
-                  marginTop:common.FIVE,
+                  marginTop: common.FIVE,
                 }} rippleColor={colors.VOILET}>
-                  <Text style={{color:colors.WHITE}}>Update your budget</Text>
+                  <Text style={{ color: colors.WHITE }}>Update your budget</Text>
                 </TouchableRipple>
               </View>}
           </View>
@@ -160,20 +176,34 @@ const DashboardScreen = ({ navigation }) => {
             values={["Daily", "Weekly", "Monthly", "Year"]}
             selectedIndex={tabIndex}
             borderRadius={20}
-            tabsContainerStyle={{ backgroundColor: 'transparent', borderWidth: 1, borderColor: colors.WHITE, borderRadius: 20 }}
+            tabsContainerStyle={{
+              backgroundColor: 'transparent',
+              borderWidth: 1,
+              borderColor: colors.WHITE,
+              borderRadius: 20,
+              marginBottom:common.TWENTEE
+            }}
             tabStyle={{ backgroundColor: 'transparent', borderColor: colors.WHITE, borderWidth: 0, paddingVertical: 10 }}
             tabBadgeStyle={{ borderWidth: 0 }}
             tabTextStyle={{ color: colors.WHITE, fontSize: fontSize.T }}
             activeTabStyle={{ backgroundColor: colors.BLACK, borderRadius: 20 }}
             onTabPress={(index) => setTabIndex(index)}
             enabled={true} />
-          <View style={dashboardStyle.recentTransition}>
-            <Text>Recent Transaction</Text>
-            <TouchableOpacity><Text>View All</Text></TouchableOpacity>
-          </View>
-          <TransactionItem amount={2500} itemType={"Income"} add={true} />
-          <TransactionItem amount={500} itemType={"Expanses"} add={false} />
-          <TransactionItem amount={7500} itemType={"Income"} add={true} />
+
+          {tabIndex === 0 ?
+            <>
+              <View style={dashboardStyle.recentTransition}>
+                <Text>Recent Transaction</Text>
+                <TouchableOpacity><Text>View All</Text></TouchableOpacity>
+              </View>
+              <TransactionItem amount={total || 0} itemType={"Expanses"} add={false} />
+            </> : tabIndex === 1 ? <TransactionItem amount={weekTotal} itemType={"Expanses"} add={false} />
+              : tabIndex === 2 ? <>
+                <TransactionItem amount={Number(budgetData?.totalIncome) || 0} itemType={`${currMonthName} Budget`} add={true} />
+                <TransactionItem amount={monthTotal} itemType={"Expanses"} add={false} />
+                <Text style={{textAlign:'right'}}>Expanses {percentages(monthTotal, Number(budgetData?.totalIncome))}% of {budgetData?.totalIncome || 0}</Text>
+              </> :
+                <TransactionItem amount={yearTotal} itemType={"Expanses"} add={false} />}
         </View>
       </View>
     </ScrollView>

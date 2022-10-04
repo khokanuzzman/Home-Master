@@ -14,15 +14,6 @@ export const setLoggedInStatusFn = async (isLogged: string) => {
     }
 }
 
-export const getLoggedStatus = async () => {
-    try {
-        return await AsyncStorage.getItem('loggedIn');
-        // setIsLoggedIn(Boolean(isLoggedIn));
-    } catch (error) {
-        console.log("Error retrieving data" + error);
-    }
-}
-
 export const logoutFn = (props) => {
     auth()
         .signOut()

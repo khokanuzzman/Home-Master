@@ -2,13 +2,15 @@ import moment from 'moment';
 import React, { useEffect, useLayoutEffect } from 'react';
 import { Button, ScrollView, StyleSheet, View } from 'react-native';
 import { Text, TextInput, Title } from 'react-native-paper';
-import { currentUser } from '../../store/redux-storage/auth/auth.action';
 import database from '@react-native-firebase/database';
 import { notificationFn } from '../../core/notification/notification';
 import colors from '../../constants/common/colors';
 import { BudgetDTO } from '../../constants/budget/budgetDTO';
 import { useDispatch, useSelector } from 'react-redux';
 import * as commonAction from '../../store/redux-storage/common/common.action';
+import { percentages } from '../../core/utils';
+import { currentUser } from '../../navigation/app.navigation.container';
+import LoaderComponent from '../../components/loader.component';
 
 const BudgetFormScreen = (props: any) => {
   const amount = useSelector((state) => state.common.amount);
@@ -19,6 +21,7 @@ const BudgetFormScreen = (props: any) => {
   const [gaseBill, setGasBill] = React.useState<number>(0);
   const [currentBill, setCurrentBill] = React.useState<number>(0);
   const [others, setOthers] = React.useState<number>(0);
+  const [isLoading, setIsLoading] = React.useState<number>(true);
   let currMonthName = moment().format('MMMM');
   let currentYear = moment().format('YYYY');
   const dispatch = useDispatch();
@@ -36,12 +39,8 @@ const BudgetFormScreen = (props: any) => {
       });
   }
 
-  const percentages = (partialValue: number, totalValue: number) => {
-    return Math.round((100 * partialValue) / totalValue) || 0;
-  }
-
   const calculateBudget = () => {
-    let current = (bazarAmount + houseRent + currentBill + gaseBill + others);
+    let current = Number(bazarAmount + houseRent + currentBill + gaseBill + others);
     dispatch(commonAction.amountCalculation(current));
   }
 
@@ -56,11 +55,16 @@ const BudgetFormScreen = (props: any) => {
         setGasBill(snapshot.val()?.gaseBill || 0);
         setCurrentBill(snapshot.val()?.currentBill || 0);
         setOthers(snapshot.val()?.others || 0);
+        setIsLoading(false);
       });
 
     // Stop listening for updates when no longer required
     return () => database().ref(`${baseUrl}/budget/${currMonthName}/`).off('value', onValueChange);
   }, []);
+
+  if(isLoading){
+    return(<LoaderComponent/>)
+}
 
   return (
     <ScrollView>

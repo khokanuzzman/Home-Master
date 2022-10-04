@@ -43,6 +43,7 @@ export default StyleSheet.create({
         backgroundColor: colors.GREEN,
         paddingHorizontal: common.TWENTEE,
         flexDirection: 'row',
+        justifyContent:'center',
         alignItems: 'center',
         paddingVertical: common.TEN, borderRadius: 40
     },
