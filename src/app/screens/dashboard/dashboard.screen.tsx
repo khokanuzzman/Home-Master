@@ -20,7 +20,7 @@ import { budgetUrl, currentMonthWeek, currMonthName, currentDate, dayName, month
 import { BudgetDTO } from '../../constants/budget/budgetDTO';
 import { percentages } from '../../core/utils';
 import { currentUser } from '../../navigation/app.navigation.container';
-import Animated, { Layout,FadeOutDown, FadeInUp, Easing, FlipInXUp, FlipOutXDown, FadeIn, FadeOut, ZoomOut, ZoomIn, ZoomOutRotate, ZoomInRotate } from 'react-native-reanimated';
+import Animated, { Layout,FadeOutDown, FadeInUp, Easing, FlipInXUp, FlipOutXDown, FadeIn, FadeOut, ZoomOut, ZoomIn, ZoomOutRotate, ZoomInRotate, BounceOut, RotateOutDownLeft, RotateOutDownRight, withTiming, withDelay, SlideInLeft } from 'react-native-reanimated';
 
 const DashboardScreen = ({ navigation }) => {
   const reference = database().ref('/users/123');
@@ -58,6 +58,30 @@ if (
   //   displayName: "Khokan",
   //   photoURL: 'https://my-cdn.com/assets/user/123.png',
   // });
+  const entering = (targetValues) => {
+    'worklet';
+    const animations = {
+      originX: withTiming(targetValues.originX, { duration: 3000 }),
+      opacity: withTiming(1, { duration: 2000 }),
+      borderRadius: withDelay(4000, withTiming(20, { duration: 3000 })),
+      // transform: [
+      //   { rotate: withTiming('0deg', { duration: 4000 }) },
+      //   { scale: withTiming(1, { duration: 3500 }) },
+      // ],
+    };
+    const initialValues = {
+      originY: -targetValues.targetWidth,
+      // originX: targetValues.targetWidth,
+      opacity: 0,
+      borderRadius: 10,
+      transform: [{ rotate: '90deg' }, { scale: 0 }],
+    };
+    console.log(initialValues)
+    return {
+      initialValues,
+      animations,
+    };
+  };
 
   useEffect(() => {
     const onValueChange = db
@@ -118,7 +142,7 @@ if (
           <View style={dashboardStyle.amountButtonSection}>
             <Animated.View
             key={budgetData?.totalIncome}
-            entering={ZoomInRotate.duration(200)}
+            entering={SlideInLeft.delay(2000)}
             // exiting={ZoomIn}
             style={dashboardStyle.amount}>
               <View style={{ justifyContent: 'center', alignItems: 'center' }}>
@@ -128,12 +152,12 @@ if (
             </Animated.View>
             <Animated.View 
             key={monthTotal}
-            entering={ZoomInRotate.duration(200)}
-            // exiting={ZoomIn}
+            // entering={entering}
+            // exiting={RotateOutDownRight.duration(2000)}
             style={[dashboardStyle.amount, { backgroundColor: colors.RED }]}>
               <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                 <Text style={{ color: colors.WHITE }}>Monthly Expanses</Text>
-                <Text style={{ color: colors.WHITE, fontWeight: 'bold', fontSize: fontSize.XL }}>{monthTotal}</Text>
+                <Animated.Text key={monthTotal} entering={SlideInLeft.delay(2000)}><Text style={{ color: colors.WHITE, fontWeight: 'bold', fontSize: fontSize.XL }}>{monthTotal}</Text></Animated.Text>
               </View>
             </Animated.View>
           </View>
