@@ -13,12 +13,23 @@ import colors from '../../constants/common/colors';
 import { notificationFn } from '../../core/notification/notification';
 import { theme } from '../../core/theme';
 import { emailValidator, passwordValidator } from '../../core/utils';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthInfo } from '../../constants/auth/authDto';
 
 const LoginScreen = ({navigation}) => {
-    const dispatch = useDispatch();
+    const dispatch:any = useDispatch();
     const [email, setEmail] = useState({ value: '', error: '' });
     const [password, setPassword] = useState({ value: '', error: '' });
     const [isLoading, setIsLoading] = useState(false);
+
+    const setUserInfoAsync = async (userInfo:AuthInfo) => {
+        try {
+          const jsonValue = JSON.stringify(userInfo);
+          await AsyncStorage.setItem('userInfoObj', jsonValue);
+        } catch (e) {
+          // saving error
+        }
+      };
 
     const _onLoginPressed = () => {
         const emailError = emailValidator(email.value);
@@ -40,9 +51,9 @@ const LoginScreen = ({navigation}) => {
             .signInWithEmailAndPassword(email, password)
             .then((res) => {
                 navigation.navigate('dashboard');
-                dispatch(authAction.authInfo(res)).then(()=>{
+                setUserInfoAsync(res?.user).then(()=>{
                     setIsLoading(false);
-                });
+                })
             })
             .catch(error => {
                 if (error.code === 'auth/wrong-password') {
@@ -93,7 +104,7 @@ const LoginScreen = ({navigation}) => {
 
             <View style={styles.forgotPassword}>
                 <TouchableOpacity
-                    onPress={() => props.navigation.navigate('forgot')}
+                    onPress={() =>navigation.navigate('forgot')}
                 >
                     <Text style={styles.label}>Forgot your password?</Text>
                 </TouchableOpacity>

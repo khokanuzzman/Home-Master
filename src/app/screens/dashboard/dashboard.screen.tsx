@@ -20,9 +20,14 @@ import { budgetUrl, currentMonthWeek, currMonthName, currentDate, dayName, month
 import { BudgetDTO } from '../../constants/budget/budgetDTO';
 import { percentages } from '../../core/utils';
 import { currentUser } from '../../navigation/app.navigation.container';
-import Animated, { Layout,FadeOutDown, FadeInUp, Easing, FlipInXUp, FlipOutXDown, FadeIn, FadeOut, ZoomOut, ZoomIn, ZoomOutRotate, ZoomInRotate } from 'react-native-reanimated';
+import Animated, { Layout,FadeOutDown, FadeInUp, Easing, FlipInXUp, FlipOutXDown, FadeIn, FadeOut, ZoomOut, ZoomIn, ZoomOutRotate, ZoomInRotate, BounceOut, RotateOutDownLeft, RotateOutDownRight, withTiming, withDelay, SlideInLeft } from 'react-native-reanimated';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AuthInfo } from '../../constants/auth/authDto';
+import { useDispatch, useSelector } from 'react-redux';
+import * as authAction from '../../../app/store/redux-storage/auth/auth.action';
 
 const DashboardScreen = ({ navigation }) => {
+  const dispatch = useDispatch<any>();
   const reference = database().ref('/users/123');
   const [tabIndex, setTabIndex] = useState(0);
   // Set an initializing state whilst Firebase connects
@@ -35,8 +40,11 @@ const DashboardScreen = ({ navigation }) => {
   const [total, setTotal] = useState();
   const db = database();
   const baseUrlUid = `home-master/${currentUser?.uid}`
+  const [userInfo,setUserInfo] = useState(new AuthInfo());
+  const authInfo: AuthInfo = useSelector((state:any) => state.auth.authInfo);
 // Enable LayoutAnimation under Android
 const [boxPosition, setBoxPosition] = useState("left");
+
 if (
   Platform.OS === "android" &&
   UIManager.setLayoutAnimationEnabledExperimental
@@ -50,14 +58,22 @@ if (
     update: { type: "spring", springDamping: 0.4 },
     delete: { type: "linear", property: "opacity" }
   });
-// toggleBox();
-  // console.log(year,month);
-  // Handle user state changes
 
-  // currentUser?.updateProfile({
-  //   displayName: "Khokan",
-  //   photoURL: 'https://my-cdn.com/assets/user/123.png',
-  // });
+  const getUserInfo = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem('userInfoObj');
+      dispatch(authAction.authInfo(jsonValue != null ? JSON.parse(jsonValue) : null))
+      setUserInfo(jsonValue != null ? JSON.parse(jsonValue) : null)
+    } catch (e) {
+      // error reading value
+    }
+  };
+
+  useEffect(()=>{
+    getUserInfo().then(()=>{})
+  },[])
+
+  console.log(userInfo)
 
   useEffect(() => {
     const onValueChange = db
@@ -74,10 +90,14 @@ if (
     const onValueChange = db
       .ref(`${baseUrlUid}/expenses/${year}/`)
       .on('value', snapshot => {
+        // console.log(currentDate)
+        // console.log("currentweek",snapshot.val()?.["4"])
+        // console.log("month total",snapshot.val()?.[month.toString()]?.[currentMonthWeek.toString()]?.[currentDate.toString()])
         setYearTotal(snapshot.val()?.yearTotal || 0);
-        setMonthTotal(snapshot.val()?.[month]?.["monthTotal"] || 0);
-        setWeekTotal(snapshot.val()?.[month]?.[currentMonthWeek]?.["weekTotal"] || 0);
-        setTotal(snapshot.val()?.[month]?.[currentMonthWeek]?.[currentDate]?.["total"] || 0);
+        setMonthTotal(snapshot.val()?.[month.toString()]?.["monthTotal"] || 0);
+        setWeekTotal(snapshot.val()?.[month.toString()]?.[currentMonthWeek.toString()]?.["weekTotal"] || 0);
+        setTotal(snapshot.val()?.[month.toString()]?.[currentMonthWeek.toString()]?.[currentDate.toString()]?.["total"] || 0);
+        console.log(monthTotal)
       });
 
     // Stop listening for updates when no longer required
@@ -118,7 +138,7 @@ if (
           <View style={dashboardStyle.amountButtonSection}>
             <Animated.View
             key={budgetData?.totalIncome}
-            entering={ZoomInRotate.duration(200)}
+            entering={SlideInLeft.delay(2000)}
             // exiting={ZoomIn}
             style={dashboardStyle.amount}>
               <View style={{ justifyContent: 'center', alignItems: 'center' }}>
@@ -128,12 +148,12 @@ if (
             </Animated.View>
             <Animated.View 
             key={monthTotal}
-            entering={ZoomInRotate.duration(200)}
-            // exiting={ZoomIn}
+            // entering={entering}
+            // exiting={RotateOutDownRight.duration(2000)}
             style={[dashboardStyle.amount, { backgroundColor: colors.RED }]}>
               <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                 <Text style={{ color: colors.WHITE }}>Monthly Expanses</Text>
-                <Text style={{ color: colors.WHITE, fontWeight: 'bold', fontSize: fontSize.XL }}>{monthTotal}</Text>
+                <Animated.Text key={monthTotal} entering={SlideInLeft.delay(2000)}><Text style={{ color: colors.WHITE, fontWeight: 'bold', fontSize: fontSize.XL }}>{monthTotal}</Text></Animated.Text>
               </View>
             </Animated.View>
           </View>

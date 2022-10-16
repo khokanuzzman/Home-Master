@@ -21,10 +21,10 @@ const BudgetFormScreen = (props: any) => {
   const [gaseBill, setGasBill] = React.useState<number>(0);
   const [currentBill, setCurrentBill] = React.useState<number>(0);
   const [others, setOthers] = React.useState<number>(0);
-  const [isLoading, setIsLoading] = React.useState<number>(true);
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
   let currMonthName = moment().format('MMMM');
   let currentYear = moment().format('YYYY');
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<any>();
 
 
   const db = database();
@@ -32,9 +32,11 @@ const BudgetFormScreen = (props: any) => {
   const budgetUrl = `${baseUrl}/budget/${currentYear}/${currMonthName}/`
 
   const addBudget = async () => {
+    console.log("WORKING")
     db.ref(budgetUrl)
       .set({ totalIncome: totalIncome, bazarAmount: bazarAmount, houseRent: houseRent, gaseBill: gaseBill, currentBill: currentBill, others: others })
       .then(() => {
+        console.log("console working")
         notificationFn(`budget added for ${currMonthName + "," + currentYear}`);
       });
   }

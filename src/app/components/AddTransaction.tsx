@@ -30,7 +30,7 @@ const AddTransactionForm = (props: Props) => {
     const [yearlyExpanses, setYearlyExpanses] = useState({});
     const [monthExpanses, setMonthExpanses] = useState({});
     const transactionStatus = useSelector((state: any) => state.common.transectionStatus);
-    const authInfo: AuthInfo = useSelector((state) => state.auth.authInfo);
+    const authInfo: AuthInfo = useSelector((state:any) => state.auth.authInfo);
     const [date, setDate] = useState(new Date());
     const [year, setYear] = useState(date.getFullYear());
     const [week, setWeek] = useState<number>(0);
@@ -51,6 +51,7 @@ const AddTransactionForm = (props: Props) => {
     const db = database();
     const baseUrlUid = `home-master/${authInfo?.uid}`
     const baseUrl = `home-master`
+    console.log(authInfo);
 
     const [itemsCategory, setItemsCategory] = useState([{}]);
     const [items, setItems] = useState([{}]);
@@ -63,7 +64,7 @@ const AddTransactionForm = (props: Props) => {
         let data: TransectionDTO = currentDateData;
         let index = data?.bazarItem.findIndex(x => x.item === valueItem);
         if (!data) {
-            db.ref(`${baseUrlUid}/expenses/${year}/${month}/${week}/${selectedDate.toString()}`)
+            db.ref(`home-master/${authInfo?.uid}/expenses/${year}/${month}/${week}/${selectedDate.toString()}`)
                 .set({ bazarCategory: valueCateroy, bazarItem: [{ item: valueItem, price: itemPrice, quantity: quantity }] })
                 .then(() => {
                     notificationFn('Add Successfully submitted');
@@ -103,6 +104,38 @@ const AddTransactionForm = (props: Props) => {
                     notificationFn('total Successfully submitted');
                 });
             Keyboard.dismiss()
+        }
+    }
+
+    const sumFnWeekTotal =()=>{
+        if (weekTotal) {
+            db.ref(`${baseUrlUid}/expenses/${year}/${month}/${week}/`)
+                .update({ weekTotal: weekTotal })
+                .then((res) => {
+                    notificationFn('weekTotal Successfully updated');
+                });
+        }
+    }
+
+    const sumFnMonth=()=>{
+        // console.log("week sum: ",weekSum(year,month,week))
+        console.log("monthTotal",monthTotal)
+        if (monthTotal) {
+            db.ref(`${baseUrlUid}/expenses/${year}/${month}/`)
+                .update({ monthTotal: monthTotal })
+                .then((res) => {
+                    notificationFn('Month Total Successfully updated');
+                });
+        }
+    }
+
+    const sumFnYearTotal=()=>{
+        if (monthTotal) {
+            db.ref(`${baseUrlUid}/expenses/${year}/`)
+                .update({ yearTotal: yearTotal })
+                .then((res) => {
+                    notificationFn('Year Total Successfully updated');
+                });
         }
     }
 
@@ -151,7 +184,7 @@ const AddTransactionForm = (props: Props) => {
             .ref(url)
             .on('value', snapshot => {
                 setItems(snapshot.val() || null);
-                // console.log("items data", snapshot.val());
+                console.log("items data", snapshot.val());
             });
 
         // Stop listening for updates when no longer required
@@ -200,33 +233,38 @@ const AddTransactionForm = (props: Props) => {
                 }
             });
             setWeekTotal(total);
+            sumFnWeekTotal()
         });
     }
+
     const monthSum = (year, month) => {
         let total = 0;
         let ref = firebase.database().ref(`${baseUrlUid}/expenses/${year}/${month}`);
         let query = ref
         query.once("value", (snapshot) => {
             snapshot.forEach((child) => {
-                if (typeof (child.val()) === "object") {
-                    total += Number(child.val().weekTotal);
+                if (typeof child.val() === "object" && !isNaN(child.val()?.["weekTotal"])) {
+                    // Convert weekTotal to number and add it to total
+                    total += Number(child.val()?.weekTotal);
                 }
             });
+            console.log(total);
             setMonthTotal(total);
+            sumFnMonth();
         });
     }
-
     const yearSum = (year) => {
         let total = 0;
         let ref = firebase.database().ref(`${baseUrlUid}/expenses/${year}`);
         let query = ref
         query.once("value", (snapshot) => {
             snapshot.forEach((child) => {
-                if (typeof (child.val()) === "object") {
-                    total += Number(child.val().monthTotal);
+                if (typeof child.val() === "object" && !isNaN(child.val()?.["monthTotal"])) {
+                    total += Number(child.val()?.monthTotal);
                 }
             });
             setYearTotal(total);
+            sumFnYearTotal()
         });
     }
 
@@ -238,36 +276,17 @@ const AddTransactionForm = (props: Props) => {
 
 
     useEffect(() => {
-        // console.log("week sum: ",weekSum(year,month,week))
-        if (weekTotal) {
-            db.ref(`${baseUrlUid}/expenses/${year}/${month}/${week}/`)
-                .update({ weekTotal: weekTotal })
-                .then((res) => {
-                    notificationFn('weekTotal Successfully updated');
-                });
-        }
+        sumFnWeekTotal()
     }, [weekTotal]);
 
     useEffect(() => {
         // console.log("week sum: ",weekSum(year,month,week))
-        if (monthTotal) {
-            db.ref(`${baseUrlUid}/expenses/${year}/${month}/`)
-                .update({ monthTotal: monthTotal })
-                .then((res) => {
-                    notificationFn('Month Total Successfully updated');
-                });
-        }
+        sumFnMonth()
     }, [monthTotal]);
 
     useEffect(() => {
         // console.log("week sum: ",weekSum(year,month,week))
-        if (monthTotal) {
-            db.ref(`${baseUrlUid}/expenses/${year}/`)
-                .update({ yearTotal: yearTotal })
-                .then((res) => {
-                    notificationFn('Year Total Successfully updated');
-                });
-        }
+        sumFnYearTotal()
     }, [yearTotal]);
 
 
@@ -377,7 +396,7 @@ const AddTransactionForm = (props: Props) => {
             <Provider>
                 <Portal>
                     <Modal visible={visible} onDismiss={hideModal} contentContainerStyle={styles.modalStyle}>
-                        <Text style={{ fontSize: fontSize.TITLE, textAlign: 'center' }}> Daily Report</Text>
+                        <Text style={{ fontSize: fontSize.TITLE, textAlign: 'center',color:colors.BLACK }}> Daily Report</Text>
                         <View style={styles.itemWrapper}>
                             <View style={styles.detailsHeader}>
                                 <Text>{"Category: "}{currentDateData?.bazarCategory}</Text>
@@ -393,9 +412,9 @@ const AddTransactionForm = (props: Props) => {
                                 return <>
                                     <View style={[styles.detailsExpenses, { borderBottomWidth: currentDateData.bazarItem.length === i + 1 ? 0 : 1 }]}>
                                         <Text style={{ flex: 0.1 }}>{i + 1}</Text>
-                                        <Text style={{ flex: 1, textAlign: 'center' }}>{item?.item || "0"}</Text>
-                                        <Text style={{ flex: 1, textAlign: 'center' }}>{item?.quantity || "0"}</Text>
-                                        <Text style={{ flex: 1, textAlign: 'center' }}>{item?.price || "0"} Tk</Text>
+                                        <Text style={{ flex: 1, textAlign: 'center',color:colors.BLACK }}>{item?.item || "0"}</Text>
+                                        <Text style={{ flex: 1, textAlign: 'center',color:colors.BLACK }}>{item?.quantity || "0"}</Text>
+                                        <Text style={{ flex: 1, textAlign: 'center',color:colors.BLACK }}>{item?.price || "0"} Tk</Text>
                                     </View>
                                 </>
                             })}
@@ -411,10 +430,9 @@ const AddTransactionForm = (props: Props) => {
                             flexWrap: 'wrap',
                             padding: common.TWENTEE
                         }}>
-                            {/* <Text style={{ textAlign: 'right', right: 50, color: colors.RED, fontWeight: "bold" }}>Year Total({moment(date).format("YYYY")}): <Text>{yearTotal}</Text> Tk</Text> */}
-                            {!yearTotal ? <TouchableRipple style={styles.expansesBtn} rippleColor={colors.VOILET} onPress={() => { yearSum(year) }}><Text style={styles.expansesText}>Year expanses</Text></TouchableRipple> : null}
-                            {!monthTotal ? <TouchableRipple style={styles.expansesBtn} rippleColor={colors.VOILET} onPress={() => { monthSum(year, month) }}><Text style={styles.expansesText}>Month expanses</Text></TouchableRipple> : null}
-                            {!weekTotal ? <TouchableRipple style={styles.expansesBtn} rippleColor={colors.VOILET} onPress={() => { weekSum(year, month, week) }}><Text style={styles.expansesText}>Week expanses</Text></TouchableRipple> : null}
+                            <TouchableRipple style={styles.expansesBtn} rippleColor={colors.VOILET} onPress={() => { yearSum(year) }}><Text style={styles.expansesText}>Year expanses</Text></TouchableRipple>
+                            <TouchableRipple style={styles.expansesBtn} rippleColor={colors.VOILET} onPress={() => { monthSum(year, month) }}><Text style={styles.expansesText}>Month expanses</Text></TouchableRipple>
+                            <TouchableRipple style={styles.expansesBtn} rippleColor={colors.VOILET} onPress={() => { weekSum(year, month, week) }}><Text style={styles.expansesText}>Week expanses</Text></TouchableRipple>
                         </View>
                     </Modal>
                 </Portal>
@@ -473,8 +491,6 @@ const styles = StyleSheet.create({
         backgroundColor: colors.VOILET,
     },
     modalStyle: {
-        width: "90%",
-        height: '70%',
         alignSelf: 'center',
         backgroundColor: colors.WHITE,
         justifyContent: 'center'
@@ -499,7 +515,8 @@ const styles = StyleSheet.create({
     flex1: {
         flex: 1,
         textAlign: 'center',
-        fontWeight: '700'
+        fontWeight: '700',
+        color:colors.BLACK
     },
     expansesBtn: {
         padding: common.TEN,

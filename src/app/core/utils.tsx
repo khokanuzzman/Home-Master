@@ -30,7 +30,11 @@ export const weekNumber = (selectedDate: any) => {
   const d = selectedDate;
   const date = d.getDate();
   const day = d.getDay();
-  const weekOfMonth = Math.ceil((date - 1 - day) / 7);
+  let weekOfMonth = Math.ceil((date - 1 - day) / 7);
+  // If weekOfMonth is 0, set it to 1
+  if (weekOfMonth === 0) {
+    weekOfMonth = 1;
+  }
   // Display the calculated result      
   return weekOfMonth;
 };

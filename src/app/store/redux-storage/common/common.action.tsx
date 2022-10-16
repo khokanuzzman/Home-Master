@@ -11,8 +11,9 @@ export const dayName = moment().format('dddd');
 export const day = moment().format('d');
 export const currentDate = moment().format('D-M-YYYY');;
 export const year = moment().format('yyyy');
-export const month = moment().format('MM');
+export const month = moment().format('M');
 export const currentMonthWeek = weekNumber(new Date());
+
 
 
 const db = database();
